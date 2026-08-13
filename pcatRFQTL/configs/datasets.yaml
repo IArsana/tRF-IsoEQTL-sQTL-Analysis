@@ -1,0 +1,31 @@
+# ============================================================
+# PCa-tRFQTL Project
+#
+# File:
+#     configs/dataset.yaml
+#
+# Description:
+#     Main dataset configuration file for the PCa-tRFQTL research
+#     pipeline.
+#
+# Author:
+#     I Putu Indra Arsana
+# ============================================================
+
+gwas:
+  name: "Prostate Cancer GWAS"
+  path: "data/raw/gwas/"
+
+trfqtl:
+  name: "Cancer-tRFQTL PRAD"
+  path: "data/raw/trfqtl/"
+
+moradi:
+  s1:
+    path: "data/raw/qtl/S1/"
+  s2:
+    path: "data/raw/qtl/S2/"
+  s3:
+    path: "data/raw/qtl/S3/"
+  s4:
+    path: "data/raw/qtl/S4/"

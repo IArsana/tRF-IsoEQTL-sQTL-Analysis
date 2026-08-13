@@ -1,0 +1,31 @@
+# ============================================================
+# PCa-tRFQTL Project
+#
+# File:
+#     configs/config.yaml
+#
+# Description:
+#     Main configuration file for the PCa-tRFQTL research
+#     pipeline.
+#
+# Author:
+#     I Putu Indra Arsana
+# ============================================================
+
+project:
+  name: "pcatRFQTL"
+  version: "0.1.0"
+
+genome:
+  default_build: "hg19"
+
+paths:
+  raw_data: "data/raw"
+  interim_data: "data/interim"
+  processed_data: "data/processed"
+  results: "results"
+  figures: "figures"
+
+logging:
+  level: "INFO"
+  file: "results/statistics/pipeline.log"

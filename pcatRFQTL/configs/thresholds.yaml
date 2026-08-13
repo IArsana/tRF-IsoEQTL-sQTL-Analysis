@@ -1,0 +1,22 @@
+# ============================================================
+# PCa-tRFQTL Project
+#
+# File:
+#     configs/config.yaml
+#
+# Description:
+#     Main Threshold configuration file for the PCa-tRFQTL research
+#     pipeline.
+#
+# Author:
+#     I Putu Indra Arsana
+# ============================================================
+
+gwas:
+  genome_wide_significance: 5.0e-8
+
+qtl:
+  fdr: 0.05
+
+ld:
+  r2: 0.8
