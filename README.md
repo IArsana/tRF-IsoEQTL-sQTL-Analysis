@@ -38,29 +38,29 @@ The central hypothesis is that a subset of prostate cancer susceptibility varian
 Conceptually:
 
 ```text
-                                                         Prostate Cancer GWAS
-                                                                  │
-                                                                  ▼
-                                                         PCa risk variants
-                                                                  │
-                                                    ┌─────────────┴─────────────┐
-                                                    │                           │
-                                                    ▼                           ▼
-                                                 tRF-QTL                  iso-eQTL / sQTL
-                                                    │                           │
-                                                    ▼                           ▼
-                                                   tRF                  Transcript isoform /
-                                                                        alternative splicing
-                                                    │                           │
-                                                    └─────────────┬─────────────┘
-                                                                  ▼
-                                                        Shared regulatory loci
-                                                                  │
-                                                                  ▼
-                                                        Functional interpretation
-                                                                  │
-                                                                  ▼
-                                                         Clinical validation
+                                         Prostate Cancer GWAS
+                                                  │
+                                                  ▼
+                                         PCa risk variants
+                                                  │
+                                    ┌─────────────┴─────────────┐
+                                    │                           │
+                                    ▼                           ▼
+                                 tRF-QTL                  iso-eQTL / sQTL
+                                    │                           │
+                                    ▼                           ▼
+                                   tRF                  Transcript isoform /
+                                                        alternative splicing
+                                    │                           │
+                                    └─────────────┬─────────────┘
+                                                  ▼
+                                        Shared regulatory loci
+                                                  │
+                                                  ▼
+                                        Functional interpretation
+                                                  │
+                                                  ▼
+                                         Clinical validation
 ```
 
 ## Objectives
@@ -84,67 +84,67 @@ To identify prostate cancer-associated genetic loci that simultaneously influenc
 The analysis is organized into several major stages:
 
 ```text
-                                                    ┌─────────────────────────────┐
-                                                    │       Raw Data Sources      │
-                                                    ├─────────────────────────────┤
-                                                    │ Prostate Cancer GWAS        │
-                                                    │ PRAD tRF-QTL                │
-                                                    │ PRAD iso-eQTL               │
-                                                    │ PRAD sQTL                   │
-                                                    └──────────────┬──────────────┘
-                                                                   │
-                                                                   ▼
-                                                    ┌─────────────────────────────┐
-                                                    │      Data Validation        │
-                                                    └──────────────┬──────────────┘
-                                                                   │
-                                                                   ▼
-                                                    ┌─────────────────────────────┐
-                                                    │ Schema Harmonization        │
-                                                    │ SNP / Allele / Coordinate   │
-                                                    │ Genome Build                │
-                                                    └──────────────┬──────────────┘
-                                                                   │
-                                                                   ▼
-                                                    ┌─────────────────────────────┐
-                                                    │ Statistical Filtering       │
-                                                    └──────────────┬──────────────┘
-                                                                   │
-                                                                   ▼
-                                                          ┌────────┴─────────┐
-                                                          │                  │
-                                                          ▼                  ▼
-                                                    ┌─────────────┐    ┌───────────────┐
-                                                    │ GWAS ×      │    │ GWAS ×        │
-                                                    │ tRF-QTL     │    │ iso-eQTL/sQTL │
-                                                    └──────┬──────┘    └───────┬───────┘
-                                                           │                   │
-                                                           └─────────┬─────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ Candidate Regulatory │
-                                                          │ Loci                 │
-                                                          └──────────┬───────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ LD-based Integration │
-                                                          └──────────┬───────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ Colocalization       │
-                                                          └──────────┬───────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ Functional Analysis  │
-                                                          └──────────┬───────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ Clinical Validation  │
-                                                          └──────────┬───────────┘
-                                                                     ▼
-                                                          ┌──────────────────────┐
-                                                          │ External Validation  │
-                                                          └──────────────────────┘
+                                    ┌─────────────────────────────┐
+                                    │       Raw Data Sources      │
+                                    ├─────────────────────────────┤
+                                    │ Prostate Cancer GWAS        │
+                                    │ PRAD tRF-QTL                │
+                                    │ PRAD iso-eQTL               │
+                                    │ PRAD sQTL                   │
+                                    └──────────────┬──────────────┘
+                                                   │
+                                                   ▼
+                                    ┌─────────────────────────────┐
+                                    │      Data Validation        │
+                                    └──────────────┬──────────────┘
+                                                   │
+                                                   ▼
+                                    ┌─────────────────────────────┐
+                                    │ Schema Harmonization        │
+                                    │ SNP / Allele / Coordinate   │
+                                    │ Genome Build                │
+                                    └──────────────┬──────────────┘
+                                                   │
+                                                   ▼
+                                    ┌─────────────────────────────┐
+                                    │ Statistical Filtering       │
+                                    └──────────────┬──────────────┘
+                                                   │
+                                                   ▼
+                                          ┌────────┴─────────┐
+                                          │                  │
+                                          ▼                  ▼
+                                    ┌─────────────┐    ┌───────────────┐
+                                    │ GWAS ×      │    │ GWAS ×        │
+                                    │ tRF-QTL     │    │ iso-eQTL/sQTL │
+                                    └──────┬──────┘    └───────┬───────┘
+                                           │                   │
+                                           └─────────┬─────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ Candidate Regulatory │
+                                          │ Loci                 │
+                                          └──────────┬───────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ LD-based Integration │
+                                          └──────────┬───────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ Colocalization       │
+                                          └──────────┬───────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ Functional Analysis  │
+                                          └──────────┬───────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ Clinical Validation  │
+                                          └──────────┬───────────┘
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │ External Validation  │
+                                          └──────────────────────┘
 ```
 ## Data Sources
 The project is designed to integrate several publicly available genomic datasets.
