@@ -2,28 +2,42 @@
 # Dataset Configuration
 # =============================================================================
 #
-# Project: pcatRFQTL
+# Project:
+#   pcatRFQTL
+#
 # Purpose:
-#   Central registry for all raw, intermediate, and processed datasets used
-#   in the prostate cancer tRF-QTL / isoform-QTL integrative analysis.
+#   Central registry for all source datasets, standardized outputs,
+#   integration metadata, genome-build provenance, and data-processing
+#   policies used in the prostate cancer tRF-QTL / isoform-QTL /
+#   splicing-QTL integrative analysis.
 #
 # Author:
 #   I Putu Indra Arsana
 #
-# Notes:
-#   - Raw datasets must remain immutable.
-#   - Dataset-specific transformations belong in the ingestion modules.
-#   - Genome builds must be explicitly tracked.
+# Project Title:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+#
+# Data policy:
+#   - Raw datasets are immutable.
 #   - File paths are relative to the project root.
+#   - Source-specific schema quirks must be documented, not silently corrected.
+#   - Standardization operates on source representation without liftover.
+#   - Cross-source genome harmonization is performed only during M3.
 #
 # =============================================================================
 
 
 project:
   name: pcatRFQTL
+
   description: >
-    Integrative analysis of tRNA-derived fragment quantitative trait loci,
-    prostate cancer genetic risk, and isoform-level regulatory associations.
+    Integrative analysis of prostate cancer genetic risk variants,
+    tRNA-derived fragment quantitative trait loci, splicing QTLs,
+    transcript isoform QTLs, and isoform-level regulatory associations.
 
   author:
     name: I Putu Indra Arsana
@@ -31,6 +45,8 @@ project:
   data_policy:
     raw_data_immutable: true
     relative_paths: true
+    preserve_source_schema: true
+    preserve_source_anomalies: true
 
 
 # =============================================================================
@@ -45,8 +61,17 @@ directories:
   interim:
     path: data/interim
 
+  standardized:
+    path: data/interim/standardized
+
+  harmonized:
+    path: data/interim/harmonized
+
   processed:
     path: data/processed
+
+  qc:
+    path: data/interim/qc
 
 
 # =============================================================================
@@ -54,7 +79,6 @@ directories:
 # =============================================================================
 
 datasets:
-
 
   # ===========================================================================
   # 1. GWAS Catalog
@@ -67,10 +91,11 @@ datasets:
     name: GWAS Catalog Association Dataset
 
     description: >
-      Full GWAS Catalog association dataset containing published genome-wide
-      association study associations. This dataset is used as a source for
-      identifying prostate cancer-associated genetic variants and for
-      downstream overlap with tRF-QTL loci.
+      Full GWAS Catalog association dataset containing published
+      genome-wide association study associations. The dataset is used
+      to identify prostate cancer-associated genetic variants and to
+      support downstream overlap with tRF-QTL, splicing-QTL, and
+      isoform-QTL regulatory loci.
 
     source:
       organization: NHGRI-EBI GWAS Catalog
@@ -79,60 +104,84 @@ datasets:
       access_type: public
 
     files:
+
       associations:
         path: data/raw/gwas/gwas-catalog-download-associations-alt-full.tsv
         format: tsv
         compression: none
 
     genome:
-      build: >
-        Dataset-dependent. GWAS Catalog records may contain genomic
-        coordinates mapped to the reference genome specified by the source
-        record.
-      coordinate_system: genomic
+      build: source_dependent
+      assembly: source_dependent
+      verification_status: source_dependent
+      coordinate_system: catalog_mapped_coordinates
+
+      coordinate_join_allowed: false
+
+      note: >
+        GWAS Catalog coordinates are retained as source-dependent during
+        M3.1. Coordinate-level matching against verified hg19 datasets
+        is not permitted until the coordinate convention is explicitly
+        resolved.
 
     primary_key:
       - study_accession
-      - snp_id
+      - variant_descriptor
 
     expected_core_fields:
-      - STUDY
-      - SNP
+      - STUDY ACCESSION
+      - PUBMEDID
       - DISEASE/TRAIT
+      - MAPPED_TRAIT
+      - SNPS
+      - CHR_ID
+      - CHR_POS
+      - STRONGEST SNP-RISK ALLELE
       - P-VALUE
       - PVALUE_MLOG
       - MAPPED_GENE
-      - CHR_ID
-      - CHR_POS
       - REPORTED GENE(S)
-      - PUBLISHED_DATE
 
     intended_use:
       - prostate_cancer_gwas_filtering
-      - SNP_annotation
+      - variant_annotation
       - cancer_risk_association
-      - tRF_QTL_overlap
+      - trf_qtl_overlap
+      - isoform_qtl_overlap
+      - splicing_qtl_overlap
       - genomic_locus_annotation
 
     filtering:
+
       primary_trait:
         - Prostate cancer
 
-    output:
-      standardized:
-        path: data/interim/gwas/gwas_catalog.parquet
-        format: parquet
+    standardization:
 
-      prostate_cancer:
-        path: data/interim/gwas/prostate_cancer_gwas.parquet
-        format: parquet
+      output_directory:
+        path: data/interim/standardized/gwas_catalog
+        format: parquet_dataset
+
+      partition_pattern:
+        value: part-*.parquet
+
+      chunk_size:
+        default: 100000
+
+      p_value_policy:
+        preserve_reported_p_value: true
+        use_pvalue_mlog_for_zero_values: true
+        arbitrary_zero_replacement: false
 
     validation:
-      required:
+
+      required_columns:
         - SNPS
+        - P-VALUE
+
+      coordinate_columns:
         - CHR_ID
         - CHR_POS
-        - P-VALUE
 
       optional_columns:
         - PUBMEDID
@@ -145,18 +194,19 @@ datasets:
         - OR or BETA
         - PVALUE_MLOG
         - STUDY ACCESSION
-            
+
       checks:
         - valid_p_values
-        - valid_snp_identifiers
-        - non_empty_trait
+        - valid_variant_descriptors
         - genomic_coordinate_consistency
+        - missing_coordinate_detection
+        - duplicate_detection
 
     provenance:
       raw_file_must_not_be_modified: true
 
 
-    # ===========================================================================
+  # ===========================================================================
   # 2. Cancer-tRFQTL
   # ===========================================================================
 
@@ -171,15 +221,27 @@ datasets:
       pan-cancer tRNA-derived fragment quantitative trait loci,
       GWAS-associated tRFQTLs, survival-associated tRFQTLs,
       immune infiltration associations, drug-response associations,
-      cross-ancestry GWAS meta-analysis information, cancer-risk-associated
-      tRFQTLs, cohort characteristics, experimental sequences, and
-      POU2F1-regulated genes.
+      cross-ancestry GWAS meta-analysis information,
+      cancer-risk-associated tRFQTLs, cohort characteristics,
+      experimental sequences, and POU2F1-regulated genes.
 
     source:
       study: Cancer-tRFQTL
       publication_identifier: can-25-1282
       data_type: supplementary_research_data
       access_type: public
+
+    genome:
+      build: hg19
+      assembly: GRCh37
+      verification_status: verified
+      coordinate_system: chromosome_position
+
+      coordinate_join_allowed: true
+
+      evidence: >
+        Cancer-tRFQTL supplementary tables explicitly report SNP
+        genomic positions using hg19 coordinates.
 
     files:
 
@@ -203,96 +265,75 @@ datasets:
         sheets:
 
           S1:
-            title: "Survival-associated tRFQTLs"
+            title: Survival-associated tRFQTLs
             role: secondary
             header_row: 1
 
           S2:
-            title: "GWAS-associated tRFQTLs"
+            title: GWAS-associated tRFQTLs
             role: primary
             header_row: 1
 
           S3:
-            title: "Cross-ancestry genome-wide meta-analysis"
+            title: Cross-ancestry genome-wide meta-analysis
             role: metadata
             header_row: 1
 
           S4:
-            title: "tRF-immune infiltration associations"
+            title: tRF-immune infiltration associations
             role: secondary
             header_row: 1
 
           S5:
-            title: "tRF-drug response associations"
+            title: tRF-drug response associations
             role: secondary
             header_row: 1
 
           S6:
-            title: "Chinese population characteristics"
+            title: Chinese population characteristics
             role: metadata
             header_row: 1
 
           S7:
-            title: "Probe or primer sequences"
+            title: Probe or primer sequences
             role: metadata
             header_row: 1
 
           S8:
-            title: "UK Biobank characteristics"
+            title: UK Biobank characteristics
             role: metadata
             header_row: 1
 
           S9:
-            title: "PLCO cohort characteristics"
+            title: PLCO cohort characteristics
             role: metadata
             header_row: 1
 
           S10:
-            title: "Cancer-risk-associated tRFQTLs"
+            title: Cancer-risk-associated tRFQTLs
             role: primary
             header_row: 1
 
           S11:
-            title: "POU2F1-regulated differentially expressed genes"
+            title: POU2F1-regulated differentially expressed genes
             role: secondary
             header_row: 1
 
-    genome:
-      build: hg19
-
     workbook:
+
       number_of_sheets: 11
 
       sheets:
 
         S1:
-          name: survival_associated_tRFQTLs
-          title: >
-            Survival-associated tRFQTLs across 31 human cancers
-
+          name: survival_associated_trfqtl
+          feature_type: trf
           role: supplementary
           analysis_priority: secondary
 
-          expected_columns:
-            - Cancer type
-            - SNP ID
-            - SNP position (hg19)
-            - Alleles
-            - tRF
-            - Median survival time AA
-            - Median survival time Aa
-            - Median survival time aa
-            - P-value (survival)
-
-          intended_use:
-            - survival_annotation
-            - downstream_clinical_interpretation
-
         S2:
-          name: gwas_associated_tRFQTLs
-          title: >
-            GWAS-associated tRFQTLs across 31 human cancers
-
+          name: gwas_associated_trfqtl
+          feature_type: trf
           role: core
           analysis_priority: primary
 
@@ -309,10 +350,10 @@ datasets:
             - LD (r2)
 
           intended_use:
-            - tRF_QTL_analysis
+            - trf_qtl_analysis
             - prostate_cancer_filtering
-            - GWAS_tRFQTL_integration
-            - LD_analysis
+            - gwas_trfqtl_integration
+            - ld_analysis
 
           cancer_filter:
             primary:
@@ -320,126 +361,42 @@ datasets:
 
         S3:
           name: cross_ancestry_gwas_meta_analysis
-          title: >
-            Detailed information regarding the cross-ancestry
-            genome-wide meta-analyses
-
           role: supplementary
           analysis_priority: secondary
-
-          expected_columns:
-            - Cancer type
-            - Sub-study name
-            - No. of cases in study
-            - No. of controls in study
-            - Individual or summary level data
-            - Design, location
-            - Study reference
-
-          intended_use:
-            - study_design_annotation
-            - ancestry_annotation
-            - GWAS_provenance
 
         S4:
           name: trf_immune_infiltration
-          title: >
-            tRF-immune infiltration associations across 31 cancer types
-
           role: supplementary
           analysis_priority: secondary
-
-          expected_columns:
-            - Cancer type
-            - Cell type
-            - tRF
-            - Correlation coefficient
-            - Correlation P-value
-            - Method
-
-          intended_use:
-            - immune_microenvironment_annotation
-            - biological_interpretation
 
         S5:
           name: trf_drug_response
-          title: >
-            tRF-drug response associations across 31 cancer types
-
           role: supplementary
           analysis_priority: secondary
 
-          expected_columns:
-            - Cancer type
-            - Drug
-            - tRF
-            - Correlation coefficient
-            - Correlation P-value
-
-          intended_use:
-            - drug_response_annotation
-            - translational_interpretation
-
         S6:
           name: chinese_cohort_characteristics
-          title: >
-            Summary of characteristics of individuals from the
-            Chinese population
-
           role: supplementary
           analysis_priority: low
-
-          intended_use:
-            - cohort_annotation
-            - ancestry_context
 
         S7:
           name: probe_primer_sequences
-          title: >
-            Probe or primer sequence used in the study
-
           role: supplementary
           analysis_priority: low
-
-          expected_columns:
-            - qRT-PCR (5'-3')
-
-          intended_use:
-            - experimental_validation
-            - tRF_sequence_annotation
 
         S8:
           name: uk_biobank_characteristics
-          title: >
-            Summary of characteristics of individuals from the
-            UK Biobank cohort
-
           role: supplementary
           analysis_priority: low
-
-          intended_use:
-            - cohort_annotation
-            - replication_context
 
         S9:
           name: plco_cohort_characteristics
-          title: >
-            Summary of characteristics of individuals from the
-            PLCO cohort
-
           role: supplementary
           analysis_priority: low
 
-          intended_use:
-            - cohort_annotation
-            - replication_context
-
         S10:
-          name: cancer_risk_associated_tRFQTLs
-          title: >
-            List of tRFQTLs associated with cancer risk in the
-            GWAS meta-analyses
-
+          name: cancer_risk_associated_trfqtl
+          feature_type: trf
           role: core
           analysis_priority: primary
 
@@ -454,7 +411,7 @@ datasets:
           intended_use:
             - cancer_risk_association
             - prostate_cancer_risk
-            - tRF_QTL_GWAS_integration
+            - trf_qtl_gwas_integration
 
           cancer_filter:
             primary:
@@ -462,58 +419,43 @@ datasets:
 
         S11:
           name: pou2f1_regulated_genes
-          title: >
-            Details of differentially expressed genes modulated by POU2F1
-
           role: supplementary
           analysis_priority: low
 
-          expected_columns:
-            - Gene ID
-            - log2 (Fold Change)
-            - P-value
+    source_anomalies:
 
-          intended_use:
-            - downstream_gene_annotation
-            - mechanistic_interpretation
+      s10_non_rsid_variant:
+        raw_value: "6"
+        coordinate: "6:28958399"
+        classification: source
+        severity: warning
 
-    output:
+        standardization_policy:
+          preserve_raw_value: true
+          canonical_rsid: null
+          coordinate_remains_usable: true
+          exclude_from_rsid_only_analysis: true
 
-      s1:
-        path: data/interim/trfqtl/s1_survival_trfqtl.parquet
-        format: parquet
+    standardization:
 
-      s2_all:
-        path: data/interim/trfqtl/s2_trfqtl_all.parquet
-        format: parquet
+      output_directory:
+        path: data/interim/standardized/cancer_trfqtl
 
-      s2_prad:
-        path: data/interim/trfqtl/prad_s2_trfqtl.parquet
-        format: parquet
+      outputs:
 
-      s3:
-        path: data/interim/trfqtl/s3_cross_ancestry.parquet
-        format: parquet
+        S2:
+          path: data/interim/standardized/cancer_trfqtl/s2.parquet
+          format: parquet
 
-      s4:
-        path: data/interim/trfqtl/s4_immune_infiltration.parquet
-        format: parquet
+        S10:
+          path: data/interim/standardized/cancer_trfqtl/s10.parquet
+          format: parquet
 
-      s5:
-        path: data/interim/trfqtl/s5_drug_response.parquet
-        format: parquet
+      genome_build:
+        value: hg19
 
-      s10_all:
-        path: data/interim/trfqtl/s10_cancer_risk_trfqtl.parquet
-        format: parquet
-
-      s10_prad:
-        path: data/interim/trfqtl/prad_s10_cancer_risk_trfqtl.parquet
-        format: parquet
-
-      s11:
-        path: data/interim/trfqtl/s11_pou2f1_genes.parquet
-        format: parquet
+      prostate_cancer_filtering:
+        performed_during_standardization: false
 
     validation:
 
@@ -564,13 +506,13 @@ datasets:
         - valid_effect_sizes
         - valid_hg19_coordinates
         - non_empty_trf
-        - duplicate_snp_trf_detection
+        - duplicate_detection
 
     provenance:
       raw_file_must_not_be_modified: true
 
 
-   # ===========================================================================
+  # ===========================================================================
   # 3. Moradi Dataset
   # ===========================================================================
 
@@ -581,10 +523,11 @@ datasets:
     name: Moradi Supplementary Dataset
 
     description: >
-      Supplementary datasets from the Moradi study containing cis- and
-      trans-regulatory QTL associations, splicing QTLs, isoform expression
-      QTLs, GWAS-linked regulatory variants, and differential-expression
-      results for exon, intron, and transcript isoform features.
+      Supplementary datasets from the Moradi study containing cis-
+      and trans-regulatory QTL associations, splicing QTLs,
+      isoform expression QTLs, GWAS-linked regulatory variants,
+      and differential-expression results for exon, intron,
+      and transcript isoform features.
 
     source:
       study: Moradi
@@ -594,8 +537,19 @@ datasets:
     root_path: data/raw/moradi
 
     genome:
-      build: to_be_verified
-      coordinate_system: genomic
+      build: hg19
+      assembly: GRCh37
+      verification_status: verified
+      coordinate_system: chromosome_position
+      coordinate_join_allowed: true
+
+      evidence: >
+        The Moradi publication states that every sQTL and iso-eQTL
+        table reports SNP genomic position in hg19.
+
+      scope: >
+        Genome-build assignment applies to SNP genomic positions
+        represented in supplementary QTL tables S1-S4.
 
     files:
 
@@ -611,62 +565,34 @@ datasets:
             dataset_type: cis_sQTL
             feature_type: intron_retention
 
-            expected_columns:
-              - SNP
-              - R
-              - A
-              - SNP_pos
-              - splicing_event
-              - Stat
-              - p_value
-              - FDR
-              - beta
-              - MAF
-              - AvgCall
-              - Rsq
-
           Cis-cassette-exon-sQTL-0.05:
             dataset_type: cis_sQTL
             feature_type: cassette_exon
-
-            expected_columns:
-              - SNP
-              - R
-              - A
-              - SNP_pos
-              - splicing_event
-              - Stat
-              - p_value
-              - FDR
-              - beta
-              - MAF
-              - AvgCall
-              - Rsq
 
           Cis-iso-eQTL-0.05:
             dataset_type: cis_iso_eQTL
             feature_type: transcript_isoform
 
-            expected_columns:
-              - SNP
-              - R
-              - A
-              - SNP_pos
-              - splicing_event
-              - Stat
-              - p_value
-              - FDR
-              - beta
-              - MAF
-              - AvgCall
-              - Rsq
-
             identifier_semantics:
               splicing_event: ensembl_transcript_id
 
+        expected_columns:
+          - SNP
+          - R
+          - A
+          - SNP_pos
+          - splicing_event
+          - Stat
+          - p_value
+          - FDR
+          - beta
+          - MAF
+          - AvgCall
+          - Rsq
+
         intended_use:
-          - cis_sQTL_analysis
-          - cis_iso_eQTL_analysis
+          - cis_sqtl_analysis
+          - cis_iso_eqtl_analysis
           - prostate_cancer_regulatory_integration
 
       supplementary_s2:
@@ -680,14 +606,17 @@ datasets:
           Cis-intron-sQTL-GWAS-LD_0.5:
             dataset_type: cis_sQTL_GWAS_LD
             feature_type: intron_retention
+            feature_column: splicing_event
 
           Cis-exon-sQTL-GWAS-LD_0.5:
             dataset_type: cis_sQTL_GWAS_LD
             feature_type: cassette_exon
+            feature_column: splicing_event
 
           Cis-iso-eQTl-GWAS-LD_0.5:
             dataset_type: cis_iso_eQTL_GWAS_LD
             feature_type: transcript_isoform
+            feature_column: mRNA_isoform
 
         expected_columns:
           - sQTL_SNP
@@ -706,19 +635,24 @@ datasets:
           cancer_type: gwas_cancer
 
         source_schema_notes:
+
           - >
             The source workbook labels coordinate-valued fields as
             sQTL_SNP and tag_SNP, while rsID-valued fields occur in
             sQTL_SNP-pos and tag_SNP_pos.
+
           - >
-            Raw column names must be preserved. Semantic correction is
-            performed only in interim normalized datasets.
+            Raw column names are preserved. Semantic interpretation
+            occurs only in validated and standardized representations.
+
+          - >
+            tag_SNP_pos may contain multiple colon-separated rsIDs.
 
         intended_use:
-          - GWAS_QTL_linkage_analysis
-          - prostate_cancer_QTL_filtering
+          - gwas_qtl_linkage_analysis
+          - prostate_cancer_qtl_filtering
           - regulatory_variant_prioritization
-          - cis_iso_eQTL_integration
+          - cis_iso_eqtl_integration
 
       supplementary_s3:
         path: data/raw/moradi/Supplementary Table S3.xlsx
@@ -731,19 +665,28 @@ datasets:
           Trans-intron-sQTL:
             dataset_type: trans_sQTL
             feature_type: intron_retention
+            variant_column: SNP
+            feature_column: splicing_event
 
           Trans-exon-sQTl:
             dataset_type: trans_sQTL
             feature_type: cassette_exon
+            variant_column: T
+            feature_column: splicing_event
 
             source_schema_notes:
               - >
                 The source sheet uses column T where SNP is expected.
-                The values in this field are dbSNP rs identifiers.
+                Values in this field are dbSNP rs identifiers.
 
           Trans-iso-eQTL:
             dataset_type: trans_iso_eQTL
             feature_type: transcript_isoform
+            variant_column: SNP
+            feature_column: splicing_event
+
+            identifier_semantics:
+              splicing_event: ensembl_transcript_id
 
         expected_common_columns:
           - R
@@ -771,9 +714,21 @@ datasets:
         analysis_priority: secondary
 
         sheets:
-          - Trans-intron-sQTL-LD_0.5
-          - Trans-exon-sQTL-LD_0.5
-          - Trans-iso-eQTL-LD_0.5
+
+          Trans-intron-sQTL-LD_0.5:
+            dataset_type: trans_qtl_gwas_ld
+            feature_type: transcript_isoform
+            feature_column: mRNA_isoform
+
+          Trans-exon-sQTL-LD_0.5:
+            dataset_type: trans_qtl_gwas_ld
+            feature_type: cassette_exon
+            feature_column: splicing_event
+
+          Trans-iso-eQTL-LD_0.5:
+            dataset_type: trans_qtl_gwas_ld
+            feature_type: intron_retention
+            feature_column: splicing_event
 
         expected_columns:
           - sQTL_SNP
@@ -792,18 +747,24 @@ datasets:
           cancer_type: gwas_cancer
 
         source_schema_notes:
+
           - >
             The same coordinate/rsID header inversion observed in
             Supplementary Table S2 is present in this workbook.
+
           - >
             Some tag_SNP_pos values contain multiple rsIDs separated
-            by a colon and must not be validated as a single rsID.
+            by a colon.
+
+          - >
+            Source sheet labels do not always match the semantic type
+            of the feature column. Harmonization therefore follows
+            observed source values rather than sheet names alone.
 
       de_ep_cis:
         path: data/raw/moradi/Supplementary Table S5_DE_EP_cis.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: cis
         feature_type: exon
 
@@ -811,7 +772,6 @@ datasets:
         path: data/raw/moradi/Supplementary Table S6_DE_EP_trans.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: trans
         feature_type: exon
 
@@ -819,7 +779,6 @@ datasets:
         path: data/raw/moradi/Supplementary Table S7_DE_INT_cis.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: cis
         feature_type: intron
 
@@ -827,7 +786,6 @@ datasets:
         path: data/raw/moradi/Supplementary Table S8_DE_INT_trans.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: trans
         feature_type: intron
 
@@ -835,27 +793,15 @@ datasets:
         path: data/raw/moradi/Supplementary Table S9_DE_Isoform_cis.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: cis
         feature_type: transcript_isoform
-
-        intended_use:
-          - isoform_differential_expression
-          - biological_interpretation
-          - regulatory_target_prioritization
 
       de_isoform_trans:
         path: data/raw/moradi/Supplementary Table S10_DE_Isoform_trans_cancer_vs_control.csv
         format: csv
         role: differential_expression
-        analysis_priority: secondary
         association_type: trans
         feature_type: transcript_isoform
-
-        intended_use:
-          - isoform_differential_expression
-          - cancer_vs_control_comparison
-          - biological_interpretation
 
     differential_expression_schema:
 
@@ -876,55 +822,84 @@ datasets:
         adjusted_p_value: padj
         effect_size: log2FoldChange
 
-    output:
+    source_anomalies:
 
-      cis_intron_sqtl:
-        path: data/interim/moradi/cis_intron_sqtl.parquet
-        format: parquet
+      malformed_intron_identifier:
+        raw_value: INT1e+05
+        classification: source
+        severity: warning
 
-      cis_exon_sqtl:
-        path: data/interim/moradi/cis_exon_sqtl.parquet
-        format: parquet
+        policy:
+          preserve_raw_value: true
+          canonical_feature_id: null
+          exclude_from_canonical_feature_id_analysis: true
+          do_not_auto_correct: true
 
-      cis_iso_eqtl:
-        path: data/interim/moradi/cis_iso_eqtl.parquet
-        format: parquet
+    standardization:
 
-      cis_intron_gwas_ld:
-        path: data/interim/moradi/cis_intron_gwas_ld.parquet
-        format: parquet
+      output_directory:
+        path: data/interim/standardized/moradi_qtl
 
-      cis_exon_gwas_ld:
-        path: data/interim/moradi/cis_exon_gwas_ld.parquet
-        format: parquet
+      qtl_outputs:
 
-      cis_iso_gwas_ld:
-        path: data/interim/moradi/cis_iso_gwas_ld.parquet
-        format: parquet
+        s1_cis_intron:
+          path: data/interim/standardized/moradi_qtl/s1_cis_intron.parquet
 
-      de_ep_cis:
-        path: data/interim/moradi/de_ep_cis.parquet
-        format: parquet
+        s1_cis_exon:
+          path: data/interim/standardized/moradi_qtl/s1_cis_exon.parquet
 
-      de_ep_trans:
-        path: data/interim/moradi/de_ep_trans.parquet
-        format: parquet
+        s1_cis_isoform:
+          path: data/interim/standardized/moradi_qtl/s1_cis_isoform.parquet
 
-      de_int_cis:
-        path: data/interim/moradi/de_int_cis.parquet
-        format: parquet
+        s2_cis_intron:
+          path: data/interim/standardized/moradi_qtl/s2_cis_intron.parquet
 
-      de_int_trans:
-        path: data/interim/moradi/de_int_trans.parquet
-        format: parquet
+        s2_cis_exon:
+          path: data/interim/standardized/moradi_qtl/s2_cis_exon.parquet
 
-      de_isoform_cis:
-        path: data/interim/moradi/de_isoform_cis.parquet
-        format: parquet
+        s2_cis_isoform:
+          path: data/interim/standardized/moradi_qtl/s2_cis_isoform.parquet
 
-      de_isoform_trans:
-        path: data/interim/moradi/de_isoform_trans.parquet
-        format: parquet
+        s3_trans_intron:
+          path: data/interim/standardized/moradi_qtl/s3_trans_intron.parquet
+
+        s3_trans_exon:
+          path: data/interim/standardized/moradi_qtl/s3_trans_exon.parquet
+
+        s3_trans_isoform:
+          path: data/interim/standardized/moradi_qtl/s3_trans_isoform.parquet
+
+        s4_trans_intron:
+          path: data/interim/standardized/moradi_qtl/s4_trans_intron.parquet
+
+        s4_trans_exon:
+          path: data/interim/standardized/moradi_qtl/s4_trans_exon.parquet
+
+        s4_trans_isoform:
+          path: data/interim/standardized/moradi_qtl/s4_trans_isoform.parquet
+
+      differential_expression_output_directory:
+        path: data/interim/standardized/moradi_de
+
+      differential_expression_outputs:
+
+        S5:
+          path: data/interim/standardized/moradi_de/s5.parquet
+
+        S6:
+          path: data/interim/standardized/moradi_de/s6.parquet
+
+        S7:
+          path: data/interim/standardized/moradi_de/s7.parquet
+
+        S8:
+          path: data/interim/standardized/moradi_de/s8.parquet
+
+        S9:
+          path: data/interim/standardized/moradi_de/s9.parquet
+
+        S10:
+          path: data/interim/standardized/moradi_de/s10.parquet
 
     validation:
 
@@ -975,12 +950,6 @@ datasets:
     provenance:
       raw_files_must_not_be_modified: true
 
-    important_note: >
-      Genome build, association-model details, statistical thresholds,
-      and experimental design must be verified from the original Moradi
-      publication and supplementary documentation before genome
-      harmonization or causal interpretation.
-
 
 # =============================================================================
 # Cross-Dataset Integration Metadata
@@ -989,20 +958,38 @@ datasets:
 integration:
 
   primary_disease:
+
+    id: prostate_cancer
     name: Prostate cancer
     tcga_code: PRAD
 
+    aliases:
+      - PRAD
+      - PrCa
+      - Prostate cancer
+      - prostate cancer
+      - prostate carcinoma
+      - prostate_cancer
+
+    harmonization:
+      annotation_first: true
+      filter_during_harmonization: false
+      filter_during_analysis_ready_generation: true
+
   primary_analysis:
 
-    tRF_QTL:
+    trf_qtl:
       source: cancer_trfqtl
+
       sheets:
         - S2
         - S10
+
       cancer_type: PRAD
 
     gwas:
       source: gwas_catalog
+
       trait:
         - Prostate cancer
 
@@ -1020,6 +1007,13 @@ integration:
       cancer_type:
         - prostate_cancer
 
+    splicing_qtl:
+      source: moradi
+
+      feature_types:
+        - intron_retention
+        - cassette_exon
+
     isoform_expression:
       source: moradi
 
@@ -1027,23 +1021,89 @@ integration:
         - de_isoform_cis
         - de_isoform_trans
 
+
+  # ===========================================================================
+  # M3.1 Genome-Build Verification
+  # ===========================================================================
+
   genomic_harmonization:
 
     reference_build:
-      trfqtl: hg19
-      gwas_catalog: source_dependent
-      moradi: to_be_verified
+
+      trfqtl:
+        build: hg19
+        assembly: GRCh37
+        status: verified
+
+      moradi:
+        build: hg19
+        assembly: GRCh37
+        status: verified
+
+      gwas_catalog:
+        build: source_dependent
+        assembly: source_dependent
+        status: source_dependent
+
+    coordinate_compatibility:
+
+      cancer_trfqtl_moradi:
+        compatible: true
+        reason: >
+          Both datasets use verified hg19 / GRCh37 genomic coordinates.
+
+      cancer_trfqtl_gwas_catalog:
+        compatible: false
+        reason: >
+          GWAS Catalog coordinate build has not yet been resolved for
+          direct hg19 coordinate-level matching.
+
+      moradi_gwas_catalog:
+        compatible: false
+        reason: >
+          GWAS Catalog coordinate build has not yet been resolved for
+          direct hg19 coordinate-level matching.
+
+    target_build:
+      build: hg38
+      assembly: GRCh38
 
     liftover:
       enabled: false
       target_build: hg38
+      target_assembly: GRCh38
       stage: future_harmonization
+
+      policy:
+        preserve_original_coordinate: true
+        require_verified_source_build: true
+        prohibit_unverified_liftover: true
+
+    m3_1_status:
+      cancer_trfqtl: verified
+      moradi: verified
+      gwas_catalog: unresolved
+
+
+  # ===========================================================================
+  # Identifier Harmonization Policy
+  # ===========================================================================
 
   identifiers:
 
-    snp:
-      primary:
-        - rsID
+    variant:
+
+      rsid:
+        canonical_pattern: "^rs[0-9]+$"
+        preferred_for_cross_source_matching: true
+
+      coordinate:
+        canonical_format: "chrN:position"
+        require_verified_genome_build: true
+
+      matching_priority:
+        - canonical_rsid
+        - verified_genomic_coordinate
 
     chromosome:
       canonical_format: chrN
@@ -1056,6 +1116,10 @@ integration:
 
     transcript:
       preferred_identifier_system: Ensembl
+      preserve_version: true
+
+    splicing_event:
+      preserve_source_identifier: true
 
 
 # =============================================================================
@@ -1068,24 +1132,53 @@ processing:
     immutable: true
     modification_allowed: false
 
-  interim:
-    purpose: standardized_dataset
+  standardized:
+    purpose: source_consistent_representation
+    directory: data/interim/standardized
+    format: parquet
+
+  harmonized:
+    purpose: cross_source_comparable_representation
+    directory: data/interim/harmonized
     format: parquet
 
   processed:
     purpose: analysis_ready_dataset
+    directory: data/processed
     format: parquet
 
   transformations:
 
-    allowed:
-      - column_name_standardization
-      - datatype_conversion
-      - missing_value_normalization
-      - identifier_normalization
-      - duplicate_detection
-      - disease_filtering
-      - genome_coordinate_standardization
+    standardization:
+
+      allowed:
+        - datatype_conversion
+        - missing_value_normalization
+        - identifier_normalization
+        - coordinate_string_standardization
+        - source_schema_semantic_mapping
+        - anomaly_annotation
+
+      prohibited:
+        - genome_liftover
+        - disease_filtering
+        - cross_source_join
+        - source_value_correction
+        - row_deletion
+
+    harmonization:
+
+      allowed:
+        - genome_build_annotation
+        - coordinate_compatibility_assessment
+        - variant_identity_harmonization
+        - feature_identifier_harmonization
+        - disease_context_harmonization
+        - genome_liftover_after_verification
+
+      prohibited_without_verified_build:
+        - coordinate_join
+        - genome_liftover
 
     prohibited_in_raw:
       - row_deletion
@@ -1110,14 +1203,16 @@ quality_control:
       - missingness
       - duplicate_records
       - datatype_validation
+      - row_cardinality_preservation
 
   genomic:
 
     checks:
-      - valid_rsID
+      - valid_rsid
       - valid_chromosome
       - valid_position
       - genome_build_consistency
+      - coordinate_join_compatibility
 
   statistics:
 
@@ -1129,11 +1224,22 @@ quality_control:
       minimum: 0.0
       maximum: 1.0
 
-  output:
+    ld_r2:
+      minimum: 0.0
+      maximum: 1.0
 
-    report_directory: data/interim/qc
+  outputs:
 
-    format:
+    validation:
+      directory: data/interim/qc
+
+    standardization:
+      path: data/interim/standardized/qc/standardization_summary.json
+
+    harmonization:
+      directory: data/interim/harmonized/qc
+
+    formats:
       - json
       - csv
 

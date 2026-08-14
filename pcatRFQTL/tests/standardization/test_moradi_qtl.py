@@ -183,7 +183,7 @@ def test_standardize_coordinate() -> None:
         result[
             "genome_build"
         ]
-        == "to_be_verified"
+        == "hg19"
     )
 
 

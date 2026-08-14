@@ -141,7 +141,7 @@ def test_primary_disease_is_prostate_cancer() -> None:
 
 
 def test_genome_build_metadata() -> None:
-    """Known and unresolved genome builds should remain explicit."""
+    """Genome-build metadata should remain explicit and structured."""
 
     config = load_datasets()
 
@@ -155,16 +155,123 @@ def test_genome_build_metadata() -> None:
         ]
     )
 
-    assert (
+    trfqtl = (
         reference_build[
             "trfqtl"
+        ]
+    )
+
+    moradi = (
+        reference_build[
+            "moradi"
+        ]
+    )
+
+    gwas = (
+        reference_build[
+            "gwas_catalog"
+        ]
+    )
+
+    assert (
+        trfqtl[
+            "build"
         ]
         == "hg19"
     )
 
     assert (
-        reference_build[
-            "moradi"
+        trfqtl[
+            "assembly"
         ]
-        == "to_be_verified"
+        == "GRCh37"
+    )
+
+    assert (
+        trfqtl[
+            "status"
+        ]
+        == "verified"
+    )
+
+    assert (
+        moradi[
+            "build"
+        ]
+        == "hg19"
+    )
+
+    assert (
+        moradi[
+            "assembly"
+        ]
+        == "GRCh37"
+    )
+
+    assert (
+        moradi[
+            "status"
+        ]
+        == "verified"
+    )
+
+    assert (
+        gwas[
+            "build"
+        ]
+        == "source_dependent"
+    )
+
+    assert (
+        gwas[
+            "assembly"
+        ]
+        == "source_dependent"
+    )
+
+    assert (
+        gwas[
+            "status"
+        ]
+        == "source_dependent"
+    )
+
+def test_harmonization_target_build() -> None:
+    """Canonical harmonization target should be hg38."""
+
+    config = load_datasets()
+
+    harmonization = (
+        config[
+            "integration"
+        ][
+            "genomic_harmonization"
+        ]
+    )
+
+    assert (
+        harmonization[
+            "target_build"
+        ][
+            "build"
+        ]
+        == "hg38"
+    )
+
+    assert (
+        harmonization[
+            "target_build"
+        ][
+            "assembly"
+        ]
+        == "GRCh38"
+    )
+
+    assert (
+        harmonization[
+            "liftover"
+        ][
+            "enabled"
+        ]
+        is False
     )

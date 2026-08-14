@@ -95,7 +95,7 @@ FeatureType = Literal[
 class MoradiQTLStandardizer:
     """Standardize validated Moradi QTL records from S1-S4."""
 
-    GENOME_BUILD = "to_be_verified"
+    GENOME_BUILD = "hg19"
 
     COORDINATE_PATTERN = re.compile(
         r"^(?:chr)?"
