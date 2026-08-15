@@ -1,0 +1,60 @@
+# PCa-tRFQTL Research Pipeline
+# =============================
+#
+# File:
+#   configs/m5_gwas_locus_studies.yaml
+#
+# Description:
+#   Locked GWAS study selection for M5.3C.3 locus-level
+#   prostate cancer summary-statistics retrieval.
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+
+schema_version: 1
+
+locus_window_bp: 500000
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+studies:
+
+  - study_accession: GCST90274713
+    role: PRIMARY
+    ancestry_role: MULTI_ANCESTRY
+    phenotype: Prostate cancer
+    enabled: true
+
+  - study_accession: GCST90274714
+    role: ANCESTRY_SENSITIVITY
+    ancestry_role: EUR
+    phenotype: Prostate cancer
+    enabled: true
+
+  - study_accession: GCST90274716
+    role: ANCESTRY_SENSITIVITY
+    ancestry_role: EAS
+    phenotype: Prostate cancer
+    enabled: true
+
+  - study_accession: GCST006085
+    role: INDEPENDENT_REPLICATION
+    ancestry_role: EUR
+    phenotype: Prostate cancer
+    enabled: true
+
+  - study_accession: GCST90018685
+    role: INDEPENDENT_REPLICATION
+    ancestry_role: EAS
+    phenotype: Prostate cancer
+    enabled: true

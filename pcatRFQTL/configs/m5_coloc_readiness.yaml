@@ -1,0 +1,79 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_coloc_readiness.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.5
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+gwas:
+  source_scope: full_regional_summary_statistics
+  genome_build: GRCh38
+  trait_type: cc
+
+  required_fields:
+    - rsid
+    - beta
+    - standard_error
+    - effect_allele_frequency
+    - p_value
+
+  varbeta_derivation:
+    method: square_standard_error
+
+  dense_locus_expected: true
+
+qtl:
+  source: Moradi
+  genome_build: GRCh37
+
+  source_scope: significant_qtl_hits_only
+
+  dense_locus_expected: false
+
+  full_summary_statistics_available: false
+
+  trait_type: quant
+
+  interpretation:
+    formal_coloc_allowed: false
+    reason: significant_only_qtl_source
+
+readiness_policy:
+  require_dense_variant_coverage: true
+
+  require_variant_overlap: true
+
+  minimum_shared_variants_descriptive: 10
+
+  require_beta_varbeta_or_valid_pvalue_approximation: true
+
+  require_case_fraction_for_case_control_pvalue_approximation: true
+
+  require_ld_matrix_for_susie: true
+
+  allow_cross_build_coordinate_join: false
+
+  cross_build_variant_matching: canonical_rsid_only
+
+  perform_colocalization: false
+
+  perform_fine_mapping: false
+
+  causal_inference: false

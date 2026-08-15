@@ -1,0 +1,363 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_cancersplicingqtl_inspection.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.6C.1
+
+stage: cancersplicingqtl_prad_download_inspection
+
+
+# ============================================================================
+# Resource
+# ============================================================================
+
+resource:
+
+  resource_id: cancersplicingqtl
+
+  display_name: CancerSplicingQTL
+
+  cancer: PRAD
+
+  qtl_type: sQTL
+
+  source:
+    genotype: TCGA
+    splicing_phenotype: TCGASpliceSeq_PSI
+
+  publication:
+    doi: "10.1093/nar/gky954"
+
+  genome_build:
+    reported_build: GRCh37
+    alias: hg19
+
+  raw_directory:
+    relative_path: "data/raw/m5/cancersplicingqtl/prad"
+
+  recursive_file_discovery: true
+
+  accepted_extensions:
+    - ".txt"
+    - ".tsv"
+    - ".csv"
+    - ".xlsx"
+    - ".xls"
+    - ".gz"
+    - ".zip"
+
+
+# ============================================================================
+# Source-scope provenance
+#
+# Important:
+# CancerSplicingQTL reports identified sQTL associations rather than an
+# explicitly released complete SNP × AS-event regression universe.
+#
+# Therefore:
+#     many rows != dense unfiltered summary statistics.
+# ============================================================================
+
+source_scope:
+
+  association_scope:
+    value: significant_qtl_hits_only
+
+  complete_tested_variant_feature_matrix:
+    available: false
+
+  nonsignificant_test_universe:
+    available: false
+
+  dense_unfiltered_summary_statistics:
+    available: false
+
+  source_selection:
+    significance_filtered: true
+
+  formal_coloc_allowed_from_current_download:
+    false
+
+  interpretation:
+    "The downloaded PRAD table represents reported CancerSplicingQTL sQTL
+     associations and must not be treated as a complete unfiltered
+     variant-by-splicing-feature association scan."
+
+
+# ============================================================================
+# Candidate loci
+#
+# Candidate coordinates remain GRCh38 provenance from the disease pipeline.
+# No coordinate join between GRCh38 and CancerSplicingQTL hg19 is allowed.
+# Candidate matching in M5.6C.1 is canonical-rsID only.
+# ============================================================================
+
+candidate_leads:
+
+  rs10216902:
+    chromosome: "8"
+    grch38_position: 94467750
+
+  rs1288100:
+    chromosome: "15"
+    grch38_position: 44850179
+
+  rs2328376:
+    chromosome: "6"
+    grch38_position: 19413356
+
+
+# ============================================================================
+# Actual PRAD workbook schema
+# ============================================================================
+
+expected_schema:
+
+  cancer_type:
+    actual_column: "Cancer type"
+    required: true
+
+  variant_rsid:
+    actual_column: "SNP ID"
+    required: true
+
+  variant_position:
+    actual_column: "SNP position"
+    required: true
+
+  alleles:
+    actual_column: "Alleles"
+    required: true
+
+  gene:
+    actual_column: "Gene"
+    required: true
+
+  feature_type:
+    actual_column: "Splicing type"
+    required: true
+
+  splicing_exon:
+    actual_column: "Splicing exon"
+    required: false
+
+  feature_id:
+    actual_column: "AS ID"
+    required: true
+
+  splice_position:
+    actual_column: "Splice position"
+    required: true
+
+  beta:
+    actual_column: "Beta"
+    required: true
+
+  t_statistic:
+    actual_column: "T-stat"
+    required: true
+
+  correlation:
+    actual_column: "R"
+    required: false
+
+  p_value:
+    actual_column: "P-value"
+    required: true
+
+
+# ============================================================================
+# Allele interpretation
+# ============================================================================
+
+allele_policy:
+
+  raw_alleles_available: true
+
+  raw_column: "Alleles"
+
+  delimiter: "/"
+
+  effect_allele_orientation_verified: false
+
+  split_into_effect_and_other_allele:
+    allowed: false
+
+  interpretation:
+    "The public table reports an allele pair but does not establish within
+     this audit that the first allele is the effect allele corresponding
+     to Beta. Allele orientation must therefore remain unresolved."
+
+
+# ============================================================================
+# T-stat / standard-error audit
+# ============================================================================
+
+standard_error_audit:
+
+  standard_error_directly_reported: false
+
+  t_statistic_directly_reported: true
+
+  beta_directly_reported: true
+
+  mathematical_relation_to_test:
+    expression: "SE = abs(beta / t)"
+
+  derivation_status:
+    value: POTENTIALLY_DERIVABLE
+
+  perform_diagnostic_derivation: true
+
+  use_derived_se_for_formal_coloc:
+    false
+
+  require_nonzero_t_statistic: true
+
+  minimum_valid_fraction_for_diagnostic_consistency: 0.95
+
+  interpretation:
+    "Beta and T-stat permit a mathematical diagnostic estimate of standard
+     error for nonzero finite T statistics. M5.6C.1 may inspect this
+     relationship but must not promote derived SE to formal colocalization
+     input without separate statistical validation."
+
+
+# ============================================================================
+# Workbook policy
+# ============================================================================
+
+workbook_policy:
+
+  inspect_all_sheets: true
+
+  skip_empty_sheets: true
+
+  preserve_sheet_name: true
+
+  fail_on_incompatible_sheet_schema: true
+
+
+# ============================================================================
+# Inspection policy
+# ============================================================================
+
+inspection_policy:
+
+  significant_p_threshold: 0.05
+
+  genome_wide_like_threshold: 5.0e-8
+
+  minimum_dense_variants_per_feature: 100
+
+  minimum_dense_variants_per_feature_strict: 500
+
+  # Descriptive only.
+  # These thresholds MUST NOT establish full-locus completeness.
+  feature_density_is_descriptive_only: true
+
+  require_expected_schema: true
+
+  require_prad_rows_only: true
+
+  expected_cancer_value: PRAD
+
+  minimum_canonical_rsid_fraction: 0.95
+
+  minimum_numeric_beta_fraction: 0.95
+
+  minimum_numeric_t_fraction: 0.95
+
+  minimum_numeric_p_fraction: 0.95
+
+  allow_missing_variants_as_null: false
+
+  allow_significant_only_coloc: false
+
+  allow_inferred_standard_error_for_formal_coloc: false
+
+  allow_cross_build_coordinate_join: false
+
+  canonical_rsid_cross_build_matching: true
+
+  formal_colocalization_performed: false
+
+  fine_mapping_performed: false
+
+  causal_inference_performed: false
+
+
+# ============================================================================
+# Formal coloc requirements
+#
+# These are recorded for audit purposes even though the current source scope
+# already blocks formal coloc.
+# ============================================================================
+
+formal_coloc_requirements:
+
+  coloc_abf:
+
+    requires:
+      - canonical_variant_identity
+      - feature_identity
+      - dense_unfiltered_feature_specific_statistics
+      - beta
+      - standard_error_or_varbeta
+      - sample_size
+      - trait_type
+
+    source_scope_must_not_be_significant_only:
+      true
+
+  coloc_pvalue_approximation:
+
+    requires:
+      - canonical_variant_identity
+      - feature_identity
+      - dense_unfiltered_feature_specific_statistics
+      - p_value
+      - allele_frequency
+      - sample_size
+
+    source_scope_must_not_be_significant_only:
+      true
+
+  coloc_susie:
+
+    additional_requires:
+      - appropriate_ld_matrix
+
+
+# ============================================================================
+# Classification
+# ============================================================================
+
+classification:
+
+  primary_expected_result:
+    SIGNIFICANT_ONLY_NOT_COLOC_READY
+
+  possible_results:
+    - DATASET_NOT_PRESENT
+    - EMPTY_DATASET
+    - SCHEMA_MISMATCH
+    - NON_PRAD_CONTENT_DETECTED
+    - VARIANT_IDENTITY_INCOMPLETE
+    - FEATURE_IDENTITY_INCOMPLETE
+    - SIGNIFICANT_ONLY_NOT_COLOC_READY
+    - FORMAL_ABF_READY_SUSIE_BLOCKED
+    - FORMAL_COLOC_READY

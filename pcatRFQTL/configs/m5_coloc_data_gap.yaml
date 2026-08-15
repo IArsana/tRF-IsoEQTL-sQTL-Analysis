@@ -1,0 +1,116 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_coloc_data_gap.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.6
+
+objective:
+  resolve_missing_qtl_input_for_formal_colocalization: true
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+moradi:
+  publication:
+    year: 2022
+    doi: "10.3390/ijms232012406"
+
+  cohort:
+    cancer: PRAD
+    source: TCGA
+    ancestry: EUR
+    sample_size: 385
+
+  qtl_method:
+    software: MatrixEQTL
+
+  genome_build: GRCh37
+
+  available_public_artifact:
+    scope: significant_qtl_hits_only
+
+    contains:
+      rsid: true
+      beta: true
+      p_value: true
+      fdr: true
+
+    full_unfiltered_association_statistics: false
+
+  public_full_summary_statistics:
+    status: not_identified
+
+    interpretation:
+      "No public full unfiltered Moradi QTL summary-statistics release was
+       identified during M5.6 source review."
+
+reconstruction:
+  theoretically_possible: true
+
+  requires:
+    - individual_level_genotype_data
+    - RNA_seq_or_derived_splicing_phenotypes
+    - original_covariates
+    - original_qc_filters
+    - original_MatrixEQTL_model
+    - allele_harmonization
+    - feature_quantification_reproduction
+
+  exact_reproduction_guaranteed: false
+
+  enable_in_current_pipeline: false
+
+alternative_resources:
+
+  cancer_splicing_qtl:
+    name: CancerSplicingQTL
+    cancer: PRAD
+    data_type: sQTL
+    role: alternative_regulatory_validation
+
+    formal_coloc_status:
+      ready: false
+      reason:
+        "Dense unfiltered locus-wide association statistics have not yet
+         been validated as available for the required candidate features."
+
+resolution_policy:
+
+  allow_significant_only_coloc: false
+
+  allow_imputation_of_missing_qtl_effects: false
+
+  allow_treating_absent_qtl_rows_as_null: false
+
+  allow_cross_build_coordinate_join: false
+
+  canonical_rsid_cross_build_matching: true
+
+  require_full_locus_summary_statistics: true
+
+  require_feature_specific_qtl_statistics: true
+
+  require_effect_information: true
+
+  require_formal_variant_harmonization: true
+
+  formal_coloc_performed: false
+
+  fine_mapping_performed: false
+
+  causal_inference_performed: false

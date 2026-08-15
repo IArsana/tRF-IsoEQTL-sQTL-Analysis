@@ -1,0 +1,231 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_alternative_qtl_audit.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.6C
+
+stage: alternative_prad_qtl_resource_audit
+
+objective:
+  identify_alternative_prad_qtl_resource: true
+  determine_formal_coloc_readiness: true
+  perform_colocalization: false
+
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+
+# ============================================================================
+# Requirements for an alternative resource to replace the Moradi QTL gap
+# ============================================================================
+
+formal_coloc_requirements:
+
+  prostate_relevant:
+    required: true
+
+  feature_specific_qtl:
+    required: true
+
+  dense_locus_summary_statistics:
+    required: true
+
+  significant_and_nonsignificant_associations:
+    required: true
+
+  canonical_variant_identity:
+    required: true
+
+  effect_estimate:
+    required: true
+
+  effect_variance_or_standard_error:
+    required: true
+
+  allele_frequency:
+    required: false
+
+  p_value:
+    required: true
+
+  sample_size:
+    required: true
+
+  trait_type_known:
+    required: true
+
+  genome_build_known:
+    required: true
+
+  downloadable_or_programmatically_retrievable:
+    required: true
+
+  ld_matrix:
+    required_for_susie_only: true
+
+
+# ============================================================================
+# Candidate alternative resources
+# ============================================================================
+
+resources:
+
+  cancersplicingqtl:
+
+    display_name: CancerSplicingQTL
+
+    publication:
+      year: 2019
+      journal: Nucleic Acids Research
+
+    cancer_scope:
+      pan_cancer: true
+      includes_prad: true
+
+    source_data:
+      genotype: TCGA
+      splicing_phenotype: TCGASpliceSeq_PSI
+
+    qtl_type:
+      - sQTL
+
+    feature_scope:
+      - skipped_exon
+      - retained_intron
+      - alternate_donor
+      - alternate_acceptor
+      - alternate_terminator
+      - alternate_promoter
+
+    public_interface:
+      searchable: true
+      downloadable: true
+
+    evidence_status:
+
+      prad_available:
+        status: CONFIRMED
+
+      feature_specific_qtl:
+        status: CONFIRMED
+
+      canonical_variant_identity:
+        status: CONFIRMED
+
+      p_value:
+        status: LIKELY_AVAILABLE
+
+      effect_estimate:
+        status: NOT_VERIFIED
+
+      standard_error:
+        status: NOT_VERIFIED
+
+      allele_frequency:
+        status: NOT_VERIFIED
+
+      sample_size:
+        status: PARTIAL
+
+      genome_build:
+        status: NOT_VERIFIED
+
+      full_tested_variant_feature_matrix:
+        status: NOT_VERIFIED
+
+      nonsignificant_associations:
+        status: NOT_VERIFIED
+
+      dense_locus_summary_statistics:
+        status: NOT_VERIFIED
+
+      downloadable:
+        status: CONFIRMED
+
+      ld_matrix:
+        status: NOT_VERIFIED
+
+    current_formal_coloc_status:
+      ready: false
+
+      classification:
+        ALTERNATIVE_RESOURCE_REQUIRES_DATASET_INSPECTION
+
+      reason:
+        "CancerSplicingQTL is a confirmed PRAD sQTL resource with downloadable
+         data, but current public documentation does not establish that the
+         download contains complete tested SNP-feature association statistics,
+         including nonsignificant associations and sufficient variance metadata
+         for formal colocalization."
+
+
+# ============================================================================
+# Audit policy
+# ============================================================================
+
+audit_policy:
+
+  allowed_statuses:
+    - CONFIRMED
+    - LIKELY_AVAILABLE
+    - PARTIAL
+    - NOT_VERIFIED
+    - UNAVAILABLE
+
+  statuses_satisfying_required_field:
+    - CONFIRMED
+
+  statuses_not_sufficient_for_formal_coloc:
+    - LIKELY_AVAILABLE
+    - PARTIAL
+    - NOT_VERIFIED
+    - UNAVAILABLE
+
+  require_direct_dataset_inspection:
+    true
+
+  documentation_only_can_establish_coloc_readiness:
+    false
+
+  significant_only_associations_allowed:
+    false
+
+  infer_missing_standard_error:
+    false
+
+  assume_unreported_variants_are_null:
+    false
+
+  assume_database_download_is_complete_test_universe:
+    false
+
+  allow_cross_build_coordinate_join:
+    false
+
+  canonical_rsid_matching_allowed:
+    true
+
+  formal_colocalization_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  causal_inference_performed:
+    false

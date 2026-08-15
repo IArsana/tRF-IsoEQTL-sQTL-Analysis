@@ -1,0 +1,330 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_coloc_reconstruction.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.6B
+
+stage: colocalization_reconstruction_feasibility_audit
+
+objective:
+  assess_reconstruction_feasibility: true
+  execute_reconstruction: false
+  perform_colocalization: false
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+
+# ============================================================================
+# Target analysis to reproduce
+# ============================================================================
+
+target_analysis:
+
+  resource:
+    name: Moradi_2022
+    cancer: PRAD
+
+  cohort:
+    source: TCGA
+    ancestry: EUR
+    reported_sample_size: 385
+
+  qtl_method:
+    software: MatrixEQTL
+
+  reference_genome:
+    build: GRCh37
+
+  regulatory_scope:
+    - cis_exon
+    - cis_intron
+    - cis_isoform
+    - trans_exon
+    - trans_intron
+    - trans_isoform
+
+
+# ============================================================================
+# Reconstruction components
+#
+# Status vocabulary:
+#
+#   AVAILABLE
+#       Required input is currently available in a sufficiently usable form.
+#
+#   DERIVABLE
+#       Input can probably be generated from available source data, but
+#       requires reproducible processing.
+#
+#   PARTIAL
+#       Some information exists, but not enough for exact reproduction.
+#
+#   NOT_IDENTIFIED
+#       Required source or exact specification has not been identified.
+#
+#   NOT_REQUIRED
+#       Component is not required for the stated reconstruction.
+#
+# These values describe current pipeline knowledge and must not be interpreted
+# as claims that a resource can never be obtained.
+# ============================================================================
+
+components:
+
+  individual_level_genotype:
+    required: true
+    status: PARTIAL
+
+    source:
+      expected_dataset: TCGA_PRAD
+      access_level: controlled_or_source_dependent
+
+    notes:
+      - Genotype-level data are required to recompute genome-wide QTL tests.
+      - Variant representation must be harmonized to the original analysis.
+
+
+  genotype_qc:
+    required: true
+    status: PARTIAL
+
+    exact_original_parameters_available: false
+
+    notes:
+      - Exact variant filtering criteria must be reproduced where possible.
+      - MAF, missingness, and other genotype QC choices can change tested SNPs.
+
+
+  ancestry_definition:
+    required: true
+    status: PARTIAL
+
+    expected_population: EUR
+
+    exact_original_sample_membership_available: false
+
+    notes:
+      - Reported European ancestry does not by itself reconstruct exact sample membership.
+      - Population structure covariates may also be required.
+
+
+  transcriptomic_source:
+    required: true
+    status: AVAILABLE
+
+    source:
+      expected_dataset: TCGA_PRAD
+
+    notes:
+      - TCGA-PRAD transcriptomic data provide a potential starting resource.
+
+
+  exon_quantification:
+    required: true
+    status: DERIVABLE
+
+    exact_original_feature_matrix_available: false
+
+    notes:
+      - Exon-level phenotype definitions must reproduce the original feature construction.
+
+
+  intron_quantification:
+    required: true
+    status: DERIVABLE
+
+    exact_original_feature_matrix_available: false
+
+    notes:
+      - Intron/splicing phenotype construction must match the original analysis sufficiently closely.
+
+
+  isoform_quantification:
+    required: true
+    status: DERIVABLE
+
+    exact_original_feature_matrix_available: false
+
+    notes:
+      - Transcript/isoform definitions and quantification method may materially affect QTL results.
+
+
+  feature_annotation:
+    required: true
+    status: PARTIAL
+
+    genome_build: GRCh37
+
+    exact_original_annotation_release_available: false
+
+    notes:
+      - Feature identifiers must be mapped to the annotation version used by the original study.
+
+
+  expression_qc:
+    required: true
+    status: PARTIAL
+
+    exact_original_parameters_available: false
+
+    notes:
+      - Filtering and normalization choices can materially affect MatrixEQTL results.
+
+
+  covariates:
+    required: true
+    status: NOT_IDENTIFIED
+
+    exact_covariate_matrix_available: false
+
+    possible_components:
+      - ancestry_components
+      - clinical_covariates
+      - technical_covariates
+      - latent_expression_covariates
+
+    notes:
+      - Exact original covariate design is required for close statistical reproduction.
+
+
+  matrixeqtl_model:
+    required: true
+    status: PARTIAL
+
+    software_identified: true
+    exact_model_formula_available: false
+    exact_parameterization_available: false
+
+    notes:
+      - Identifying MatrixEQTL software alone is insufficient to reproduce the model exactly.
+
+
+  cis_window_definition:
+    required: true
+    status: PARTIAL
+
+    exact_definition_available: false
+
+
+  trans_definition:
+    required: true
+    status: PARTIAL
+
+    exact_definition_available: false
+
+
+  multiple_testing_strategy:
+    required: true
+    status: PARTIAL
+
+    reported_fdr_available: true
+    exact_testing_universe_available: false
+
+    notes:
+      - Exact FDR reproduction depends on the complete set of tested variant-feature pairs.
+
+
+  allele_harmonization:
+    required: true
+    status: DERIVABLE
+
+    notes:
+      - Effect allele orientation must be deterministic before any later colocalization.
+
+
+  full_unfiltered_qtl_output:
+    required: true
+    status: DERIVABLE
+
+    notes:
+      - This is the intended product of reconstruction rather than an existing input.
+
+
+# ============================================================================
+# Reproducibility policy
+# ============================================================================
+
+readiness_policy:
+
+  required_component_statuses_for_exact_reproduction:
+    - AVAILABLE
+
+  statuses_allowed_for_approximate_reconstruction:
+    - AVAILABLE
+    - DERIVABLE
+    - PARTIAL
+
+  blocking_statuses:
+    - NOT_IDENTIFIED
+
+  exact_reproduction_requires:
+    - individual_level_genotype
+    - genotype_qc
+    - ancestry_definition
+    - transcriptomic_source
+    - exon_quantification
+    - intron_quantification
+    - isoform_quantification
+    - feature_annotation
+    - expression_qc
+    - covariates
+    - matrixeqtl_model
+    - cis_window_definition
+    - trans_definition
+    - multiple_testing_strategy
+    - allele_harmonization
+
+  minimum_fraction_nonblocking_for_approximate_reconstruction: 0.80
+
+  require_exact_original_covariates_for_exact_reproduction: true
+  require_exact_original_feature_definitions_for_exact_reproduction: true
+  require_exact_original_qc_for_exact_reproduction: true
+
+  approximate_reconstruction_can_support:
+    exploratory_regulatory_validation: true
+    exact_replication_claim: false
+    direct_replacement_of_original_qtl_summary_statistics: false
+    formal_coloc_without_revalidation: false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  infer_missing_original_parameters: false
+
+  fabricate_covariates: false
+
+  infer_unreported_qtl_associations: false
+
+  treat_significant_only_qtl_as_full_scan: false
+
+  claim_exact_reproduction_from_approximate_pipeline: false
+
+  cross_build_coordinate_join: false
+
+  canonical_rsid_matching_allowed: true
+
+  formal_colocalization_performed: false
+
+  fine_mapping_performed: false
+
+  causal_inference_performed: false
