@@ -1,0 +1,775 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_variant_validation_feasibility.yaml
+#
+# Description:
+#   Configuration for M7.5 Variant-Level Validation Feasibility.
+#
+#   This stage performs an exact-rsID curated-association audit using the
+#   NHGRI-EBI GWAS Catalog REST API V2.
+#
+#   The stage evaluates whether the prioritized prostate-cancer tRF-QTL
+#   candidate variants have literature-curated GWAS Catalog associations
+#   that may support downstream variant-level validation.
+#
+#   IMPORTANT:
+#     - REST API V2 curated associations are not full summary statistics.
+#     - Zero curated associations are not negative genetic evidence.
+#     - A non-reused study is not automatically an independent replication.
+#     - Different GCST accessions do not establish sample independence.
+#     - TCGA somatic variants cannot substitute germline genotype.
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+
+# ============================================================================
+# Stage identity
+# ============================================================================
+
+milestone:
+  "M7.5"
+
+stage:
+  "variant_level_validation_feasibility"
+
+
+# ============================================================================
+# Locked upstream artifacts
+# ============================================================================
+
+upstream_qc:
+
+  # --------------------------------------------------------------------------
+  # M7.3C
+  # --------------------------------------------------------------------------
+
+  controlled_access:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3c_controlled_access_limitation.json"
+
+    expected_milestone:
+      "M7.3C"
+
+    expected_stage:
+      "controlled_access_limitation_resolution"
+
+    status_field:
+      "overall_resolution_status"
+
+    expected_status:
+      "CONTROLLED_ACCESS_UNAVAILABLE_AT_ANALYSIS_TIME"
+
+    required_summary_state:
+
+      controlled_access_authorization_available:
+        false
+
+      tcga_direct_trf_quantification_performed:
+        false
+
+      processed_mirna_substitution_performed:
+        false
+
+      clinical_association_performed:
+        false
+
+      access_limitation_interpreted_as_negative_evidence:
+        false
+
+
+  # --------------------------------------------------------------------------
+  # M7.4D
+  # --------------------------------------------------------------------------
+
+  external_clinical:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4d_external_clinical_association_readiness.json"
+
+    expected_milestone:
+      "M7.4D"
+
+    expected_stage:
+      "external_clinical_association_readiness"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "EXTERNAL_MOLECULAR_VALIDATION_RETAINED_CLINICAL_ASSOCIATION_NOT_JUSTIFIED"
+
+    required_summary_state:
+
+      association_model_fitted:
+        false
+
+      hypothesis_test_performed:
+        false
+
+      p_value_calculated:
+        false
+
+      effect_size_estimated:
+        false
+
+      clinical_validation_claimed:
+        false
+
+      mature_24nt_trf_abundance_claimed:
+        false
+
+      external_molecular_evidence_retained:
+        true
+
+
+# ============================================================================
+# Candidate variants
+# ============================================================================
+
+candidates:
+
+  - rsid:
+      "rs10216902"
+
+    priority_rank:
+      1
+
+    priority_class:
+      "HIGH_PRIORITY"
+
+    chromosome:
+      "8"
+
+    position:
+      95479978
+
+
+  - rsid:
+      "rs2328376"
+
+    priority_rank:
+      2
+
+    priority_class:
+      "INTERMEDIATE_PRIORITY"
+
+    chromosome:
+      "6"
+
+    position:
+      19413587
+
+
+  - rsid:
+      "rs1288100"
+
+    priority_rank:
+      3
+
+    priority_class:
+      "LOWER_PRIORITY"
+
+    chromosome:
+      "15"
+
+    position:
+      45142377
+
+
+# ============================================================================
+# Previously used disease GWAS evidence
+#
+# These analyses were already incorporated into M5.
+#
+# Therefore:
+#
+#   reused evidence != new validation
+#
+# and:
+#
+#   different accession != independent cohort
+# ============================================================================
+
+previously_used_gwas:
+
+  study_accessions:
+
+    - "GCST90274713"
+    - "GCST90274714"
+    - "GCST90274716"
+
+  treat_as_independent_replication:
+    false
+
+  related_analysis_independence:
+    false
+
+  different_accession_establishes_independence:
+    false
+
+
+# ============================================================================
+# NHGRI-EBI GWAS Catalog REST API V2
+# ============================================================================
+
+gwas_catalog:
+
+  provider:
+    "NHGRI_EBI_GWAS_CATALOG"
+
+  api_version:
+    "V2"
+
+  rest_api:
+
+    enabled:
+      true
+
+    base_url:
+      "https://www.ebi.ac.uk/gwas/rest/api/v2"
+
+    endpoint:
+      "/associations"
+
+    method:
+      "GET"
+
+
+    # ------------------------------------------------------------------------
+    # Query parameters supported by the V2 reference.
+    # ------------------------------------------------------------------------
+
+    query:
+
+      exact_variant_parameter:
+        "rs_id"
+
+      page_parameter:
+        "page"
+
+      size_parameter:
+        "size"
+
+      page_size:
+        100
+
+      start_page:
+        0
+
+
+    # ------------------------------------------------------------------------
+    # Response schema from V2 reference.
+    # ------------------------------------------------------------------------
+
+    response_schema:
+
+      links_field:
+        "links"
+
+      content_field:
+        "content"
+
+      page_field:
+        "page"
+
+      page_size_field:
+        "size"
+
+      total_elements_field:
+        "total_elements"
+
+      total_pages_field:
+        "total_pages"
+
+      page_number_field:
+        "number"
+
+
+    # ------------------------------------------------------------------------
+    # HTTP policy
+    # ------------------------------------------------------------------------
+
+    timeout_seconds:
+      120
+
+    max_retries:
+      3
+
+    retry_backoff_seconds:
+      3
+
+    client_queries_per_second:
+      5
+
+    user_agent:
+      "pcatRFQTL/1.0 M7.5 variant-validation-feasibility"
+
+
+    # ------------------------------------------------------------------------
+    # Scientific interpretation policy
+    # ------------------------------------------------------------------------
+
+    zero_result_is_negative_evidence:
+      false
+
+    zero_result_means_variant_absent:
+      false
+
+    service_failure_is_negative_evidence:
+      false
+
+    service_failure_means_variant_absent:
+      false
+
+
+  # --------------------------------------------------------------------------
+  # Raw API snapshots
+  # --------------------------------------------------------------------------
+
+  raw_snapshot_directory:
+    "data/raw/m7/variant_validation/gwas_catalog_rest_v2"
+
+  immutable_raw:
+    true
+
+  overwrite_existing_raw_snapshot:
+    false
+
+  version_snapshot_if_remote_content_changes:
+    true
+
+
+# ============================================================================
+# V2 association fields
+#
+# These fields follow the association response schema supplied by the
+# GWAS Catalog REST API V2 reference.
+# ============================================================================
+
+association_fields:
+
+  scalar:
+
+    - "association_id"
+    - "risk_frequency"
+    - "pvalue_description"
+    - "pvalue_mantissa"
+    - "pvalue_exponent"
+    - "multi_snp_haplotype"
+    - "snp_interaction"
+    - "snp_type"
+    - "description"
+    - "or_per_copy_num"
+    - "or_value"
+    - "beta_num"
+    - "beta_unit"
+    - "beta_direction"
+    - "beta"
+    - "last_mapping_date"
+    - "last_update_date"
+    - "p_value"
+    - "accession_id"
+    - "pubmed_id"
+    - "first_author"
+    - "ci_lower"
+    - "ci_upper"
+
+  list:
+
+    - "range"
+    - "reported_trait"
+    - "locations"
+    - "mapped_genes"
+    - "snp_effect_allele"
+
+  structured_list:
+
+    - "efo_traits"
+    - "snp_allele"
+    - "bg_efo_traits"
+
+
+# ============================================================================
+# Prostate-cancer trait screening
+#
+# This is a conservative screening step only.
+#
+# A text/EFO label match identifies a candidate prostate-related association,
+# not a completed phenotype-compatibility validation.
+# ============================================================================
+
+trait_relevance:
+
+  search_fields:
+
+    - "reported_trait"
+    - "efo_traits.efo_trait"
+
+  accepted_keywords:
+
+    - "prostate cancer"
+    - "prostate carcinoma"
+    - "malignant neoplasm of prostate"
+
+  case_sensitive:
+    false
+
+  efo_manual_review_required:
+    true
+
+  phenotype_compatibility_verified:
+    false
+
+
+# ============================================================================
+# Validation routes
+# ============================================================================
+
+routes:
+
+  curated_gwas_catalog:
+
+    technically_relevant:
+      true
+
+    access_type:
+      "PUBLIC"
+
+    route_available_now:
+      true
+
+    exact_rsid_lookup:
+      true
+
+    source:
+      "GWAS_CATALOG_REST_API_V2"
+
+
+  full_summary_statistics:
+
+    technically_relevant:
+      true
+
+    access_type:
+      "PUBLIC_WHEN_AVAILABLE"
+
+    available_via_rest_api_v2:
+      false
+
+    separate_stage_required:
+      true
+
+    stage:
+      "M7.5B_FULL_SUMMARY_STATISTICS_AUDIT"
+
+    required_for_all_candidates:
+      true
+
+
+  tcga_germline:
+
+    technically_relevant:
+      true
+
+    access_type:
+      "CONTROLLED"
+
+    authorized_at_analysis_time:
+      false
+
+    route_available_now:
+      false
+
+    status:
+      "TCGA_GERMLINE_VALIDATION_DEFERRED_CONTROLLED_ACCESS"
+
+
+  tcga_somatic:
+
+    technically_relevant_for_germline_validation:
+      false
+
+    may_substitute_for_germline:
+      false
+
+    route_available_now:
+      false
+
+    status:
+      "TCGA_SOMATIC_CALLS_NOT_VALID_GERMLINE_SURROGATE"
+
+
+# ============================================================================
+# Classification policy
+# ============================================================================
+
+classification:
+
+  exact_rsid_required:
+    true
+
+  exact_rsid_confirmation_field:
+    "snp_allele.rs_id"
+
+  proxy_variant_allowed:
+    false
+
+  proxy_ld_validation_performed:
+    false
+
+  candidate_substitution_allowed:
+    false
+
+  somatic_as_germline_allowed:
+    false
+
+  reused_study_is_new_validation:
+    false
+
+  nonreused_study_is_independent_replication:
+    false
+
+  different_accession_establishes_independence:
+    false
+
+  study_independence_verified:
+    false
+
+  ancestry_compatibility_verified:
+    false
+
+  phenotype_compatibility_verified:
+    false
+
+  effect_allele_harmonization_performed:
+    false
+
+  effect_direction_concordance_performed:
+    false
+
+  api_zero_result_means_variant_absent:
+    false
+
+  api_failure_means_variant_absent:
+    false
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  acquisition:
+
+    success_with_results:
+      "REST_API_V2_QUERY_SUCCESSFUL_ASSOCIATIONS_RETURNED"
+
+    success_zero_results:
+      "REST_API_V2_QUERY_SUCCESSFUL_NO_CURATED_ASSOCIATION"
+
+    service_unavailable:
+      "REST_API_V2_SERVICE_UNAVAILABLE"
+
+    invalid_response:
+      "REST_API_V2_RESPONSE_SCHEMA_INVALID"
+
+
+  association:
+
+    prostate_reused:
+      "CURATED_PROSTATE_ASSOCIATION_PREVIOUSLY_USED"
+
+    prostate_nonreused:
+      "CURATED_PROSTATE_ASSOCIATION_FOUND_INDEPENDENCE_UNRESOLVED"
+
+    nonprostate:
+      "CURATED_ASSOCIATION_FOUND_NON_PROSTATE_TRAIT"
+
+    exact_rsid_not_confirmed:
+      "CURATED_RECORD_RETURNED_EXACT_RSID_NOT_CONFIRMED"
+
+
+  candidate:
+
+    prostate_nonreused:
+      "CURATED_PROSTATE_ASSOCIATION_FOUND_INDEPENDENCE_UNRESOLVED"
+
+    prostate_reused:
+      "CURATED_PROSTATE_ASSOCIATION_PREVIOUSLY_USED_NO_NEW_VALIDATION"
+
+    nonprostate_only:
+      "CURATED_ASSOCIATION_FOUND_NO_PROSTATE_TRAIT_MATCH"
+
+    no_curated_association:
+      "NO_CURATED_ASSOCIATION_FULL_SUMMARY_STATISTICS_AUDIT_REQUIRED"
+
+    api_unavailable:
+      "CURATED_ASSOCIATION_AUDIT_DEFERRED_API_UNAVAILABLE"
+
+
+  overall:
+
+    candidate_nonreused_evidence:
+      "CURATED_VARIANT_EVIDENCE_AVAILABLE_INDEPENDENCE_UNRESOLVED"
+
+    reused_evidence_only:
+      "CURATED_VARIANT_EVIDENCE_LIMITED_TO_PREVIOUSLY_USED_STUDIES"
+
+    no_curated_evidence:
+      "NO_CURATED_VARIANT_EVIDENCE_FULL_SUMMARY_STATISTICS_AUDIT_REQUIRED"
+
+    api_unavailable:
+      "CURATED_VARIANT_AUDIT_INCOMPLETE_API_UNAVAILABLE"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  feasibility_audit_only:
+    true
+
+  curated_association_audit_only:
+    true
+
+  full_summary_statistics_audit_performed:
+    false
+
+  new_gwas_validation_claimed:
+    false
+
+  independent_replication_claimed:
+    false
+
+  study_independence_verified:
+    false
+
+  ancestry_compatibility_verified:
+    false
+
+  phenotype_compatibility_verified:
+    false
+
+  effect_allele_harmonization_performed:
+    false
+
+  effect_direction_concordance_claimed:
+    false
+
+  meta_analysis_performed:
+    false
+
+  proxy_ld_validation_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  colocalization_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+  tcga_germline_analysis_performed:
+    false
+
+  tcga_somatic_used_as_germline:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  api_zero_result_interpreted_as_negative_evidence:
+    false
+
+  api_service_failure_interpreted_as_negative_evidence:
+    false
+
+  api_zero_result_interpreted_as_variant_absence:
+    false
+
+
+# ============================================================================
+# Expected structural state
+# ============================================================================
+
+validation:
+
+  expected_candidate_count:
+    3
+
+  expected_rsids:
+
+    - "rs10216902"
+    - "rs2328376"
+    - "rs1288100"
+
+  require_unique_candidate_rsids:
+    true
+
+  require_exact_rsid_confirmation:
+    true
+
+  require_independent_replication_false:
+    true
+
+  require_somatic_as_germline_false:
+    true
+
+  require_api_negative_inference_false:
+    true
+
+  require_full_summary_statistics_next_stage:
+    true
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/variant_validation_feasibility"
+
+  acquisition_status_filename:
+    "gwas_catalog_v2_acquisition_status.parquet"
+
+  association_inventory_filename:
+    "gwas_catalog_v2_association_inventory.parquet"
+
+  candidate_feasibility_filename:
+    "candidate_variant_validation_feasibility.parquet"
+
+  route_inventory_filename:
+    "variant_validation_route_inventory.parquet"
+
+  summary_filename:
+    "variant_validation_feasibility_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_5_variant_validation_feasibility.json"
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+  "M7.5B_FULL_SUMMARY_STATISTICS_AUDIT"

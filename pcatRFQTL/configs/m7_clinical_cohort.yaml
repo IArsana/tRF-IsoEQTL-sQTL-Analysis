@@ -1,0 +1,433 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_clinical_cohort.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.2
+
+stage: tcga_prad_clinical_cohort_construction
+
+
+# ============================================================================
+# Target cohort
+# ============================================================================
+
+target_cohort:
+
+  repository:
+    "NCI_GDC"
+
+  project_id:
+    "TCGA-PRAD"
+
+  disease_code:
+    "PRAD"
+
+  cohort_unit:
+    "CASE"
+
+  expected_primary_site:
+    "Prostate"
+
+  public_clinical_metadata:
+    true
+
+
+# ============================================================================
+# GDC API
+# ============================================================================
+
+gdc_api:
+
+  cases_endpoint:
+    "https://api.gdc.cancer.gov/cases"
+
+  page_size:
+    500
+
+  timeout_seconds:
+    120
+
+  verify_ssl:
+    true
+
+  filter:
+
+    op:
+      "="
+
+    field:
+      "project.project_id"
+
+    value:
+      "TCGA-PRAD"
+
+
+  # ------------------------------------------------------------------------
+  # Case-level fields
+  # ------------------------------------------------------------------------
+
+  fields:
+
+    - "case_id"
+    - "submitter_id"
+    - "primary_site"
+    - "disease_type"
+    - "project.project_id"
+
+    # Demographic
+    - "demographic.age_at_index"
+    - "demographic.year_of_birth"
+    - "demographic.year_of_death"
+    - "demographic.race"
+    - "demographic.ethnicity"
+    - "demographic.gender"
+    - "demographic.vital_status"
+    - "demographic.days_to_death"
+
+    # Diagnosis
+    - "diagnoses.diagnosis_id"
+    - "diagnoses.submitter_id"
+    - "diagnoses.primary_diagnosis"
+    - "diagnoses.age_at_diagnosis"
+    - "diagnoses.days_to_last_follow_up"
+    - "diagnoses.days_to_last_known_disease_status"
+    - "diagnoses.days_to_recurrence"
+    - "diagnoses.last_known_disease_status"
+    - "diagnoses.progression_or_recurrence"
+    - "diagnoses.tumor_grade"
+    - "diagnoses.ajcc_pathologic_stage"
+    - "diagnoses.ajcc_pathologic_t"
+    - "diagnoses.ajcc_pathologic_n"
+    - "diagnoses.ajcc_pathologic_m"
+    - "diagnoses.ajcc_clinical_stage"
+    - "diagnoses.ajcc_clinical_t"
+    - "diagnoses.ajcc_clinical_n"
+    - "diagnoses.ajcc_clinical_m"
+    - "diagnoses.morphology"
+    - "diagnoses.tissue_or_organ_of_origin"
+
+    # Samples
+    - "samples.sample_id"
+    - "samples.submitter_id"
+    - "samples.sample_type"
+    - "samples.tissue_type"
+
+
+  # Nested entities are requested through expand because the cases endpoint
+  # supports these case-level entity groups.
+
+  expand:
+
+    - "demographic"
+    - "diagnoses"
+    - "follow_ups"
+    - "samples"
+
+
+# ============================================================================
+# Raw data policy
+# ============================================================================
+
+raw_data:
+
+  directory:
+    "data/raw/m7/tcga_prad_clinical"
+
+  filename:
+    "gdc_cases_tcga_prad.json"
+
+  immutable:
+    true
+
+  overwrite_existing:
+    false
+
+  preserve_full_response:
+    true
+
+
+# ============================================================================
+# Clinical harmonization
+# ============================================================================
+
+harmonization:
+
+  one_row_per:
+    "case"
+
+  diagnosis_selection:
+
+    strategy:
+      "PRIMARY_DIAGNOSIS_PREFERRED"
+
+    prefer_non_null_primary_diagnosis:
+      true
+
+    prefer_earliest_age_at_diagnosis:
+      true
+
+    collapse_multiple_diagnoses:
+      true
+
+
+  follow_up:
+
+    preserve_count:
+      true
+
+    derive_max_follow_up_days:
+      true
+
+    use_follow_ups_days_to_follow_up:
+      true
+
+    use_diagnosis_days_to_last_follow_up:
+      true
+
+
+  age:
+
+    primary_source:
+      "diagnoses.age_at_diagnosis"
+
+    fallback_source:
+      "demographic.age_at_index"
+
+    source_age_at_diagnosis_unit:
+      "days"
+
+    output_age_unit:
+      "years"
+
+    days_per_year:
+      365.25
+
+
+# ============================================================================
+# Endpoint construction
+# ============================================================================
+
+endpoint_policy:
+
+  # ------------------------------------------------------------------------
+  # Overall survival
+  #
+  # Event:
+  #   vital_status == Dead
+  #
+  # Time:
+  #   days_to_death for events
+  #   otherwise maximum available follow-up
+  #
+  # GDC survival logic also uses days_to_death / diagnosis follow-up /
+  # follow-up days for censoring.
+  # ------------------------------------------------------------------------
+
+  overall_survival:
+
+    enabled:
+      true
+
+    event_source:
+      "demographic.vital_status"
+
+    event_values:
+      - "Dead"
+      - "dead"
+      - "Deceased"
+      - "deceased"
+
+    death_time_source:
+      "demographic.days_to_death"
+
+    censor_sources:
+      - "follow_ups.days_to_follow_up"
+      - "diagnoses.days_to_last_follow_up"
+
+    require_positive_time:
+      true
+
+
+  # ------------------------------------------------------------------------
+  # Recurrence / progression
+  #
+  # Kept as candidate endpoint until completeness is assessed.
+  # It is NOT automatically designated primary.
+  # ------------------------------------------------------------------------
+
+  recurrence_progression:
+
+    enabled:
+      true
+
+    event_sources:
+      - "diagnoses.progression_or_recurrence"
+      - "follow_ups.progression_or_recurrence"
+
+    recurrence_time_sources:
+      - "diagnoses.days_to_recurrence"
+      - "follow_ups.days_to_recurrence"
+
+    progression_time_sources:
+      - "follow_ups.days_to_progression"
+      - "follow_ups.days_to_progression_free"
+      - "follow_ups.days_to_first_event"
+
+    positive_values:
+      - "Yes"
+      - "yes"
+
+    negative_values:
+      - "No"
+      - "no"
+
+    require_positive_time:
+      true
+
+
+# ============================================================================
+# Endpoint readiness thresholds
+#
+# These thresholds determine analytical readiness only.
+# They do not make biological claims.
+# ============================================================================
+
+endpoint_readiness:
+
+  minimum_non_missing_fraction:
+    0.50
+
+  minimum_events:
+    20
+
+  minimum_time_event_pairs:
+    20
+
+  minimum_unique_cases:
+    100
+
+
+# ============================================================================
+# Output columns
+# ============================================================================
+
+output_schema:
+
+  identifiers:
+
+    - "case_id"
+    - "patient_id"
+    - "project_id"
+
+  demographics:
+
+    - "age_at_diagnosis_years"
+    - "gender"
+    - "race"
+    - "ethnicity"
+    - "vital_status"
+
+  diagnosis:
+
+    - "primary_diagnosis"
+    - "tumor_grade"
+    - "ajcc_pathologic_stage"
+    - "ajcc_pathologic_t"
+    - "ajcc_pathologic_n"
+    - "ajcc_pathologic_m"
+    - "progression_or_recurrence"
+    - "days_to_recurrence"
+
+  follow_up:
+
+    - "follow_up_record_count"
+    - "max_follow_up_days"
+
+  survival:
+
+    - "os_event"
+    - "os_time_days"
+    - "os_usable"
+
+  recurrence:
+
+    - "recurrence_event"
+    - "recurrence_time_days"
+    - "recurrence_usable"
+
+  quality:
+
+    - "clinical_usable"
+    - "diagnosis_available"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  clinical_association_performed:
+    false
+
+  survival_model_fitted:
+    false
+
+  kaplan_meier_analysis_performed:
+    false
+
+  recurrence_declared_primary_endpoint:
+    false
+
+  endpoint_selected_by_significance:
+    false
+
+  missing_event_imputed:
+    false
+
+  missing_follow_up_imputed:
+    false
+
+  missing_stage_imputed:
+    false
+
+  missing_grade_imputed:
+    false
+
+  candidate_trf_join_performed:
+    false
+
+  genotype_join_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  primary:
+    "M7.3A_CANDIDATE_TRF_SEQUENCE_RESOLUTION"
+
+  clinical:
+    "M7.2B_ENDPOINT_READINESS_RESOLUTION"
+
+  downstream_if_expression_available:
+    "M7.4_CANDIDATE_TRF_CLINICAL_ASSOCIATION"

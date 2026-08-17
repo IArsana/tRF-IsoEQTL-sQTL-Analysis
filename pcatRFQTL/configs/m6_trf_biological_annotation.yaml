@@ -1,0 +1,504 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_trf_biological_annotation.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.4A
+
+stage: candidate_trf_biological_annotation
+
+
+# ============================================================================
+# Upstream M6.3
+# ============================================================================
+
+upstream_qc:
+
+  candidate_gene_integration:
+
+    relative_path:
+      "data/processed/m6/qc/m6_3_candidate_gene_integration.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M6.3"
+
+    expected_stage:
+      "candidate_to_gene_integration"
+
+
+# ============================================================================
+# Candidate → tRF source
+#
+# Source:
+#   data/processed/m3/candidate_snptrf.parquet
+#
+# Actual observed schema includes:
+#
+#   canonical_rsid
+#   chromosome
+#   position
+#   genome_build
+#   trf_id
+#   trf_raw
+#   p_value
+#   fdr
+#   harm_variant_rsid
+#   harm_chromosome
+#   harm_position
+#   harm_feature_id
+#   harm_feature_type
+#   m3_candidate_id
+#
+# Important:
+#
+#   - canonical_rsid is the preferred candidate rsID.
+#   - trf_id is the preferred tRF identity.
+#   - biological tRF class is NOT assumed from harm_feature_type.
+#   - parent tRNA, amino acid, anticodon, and QTL beta are not available
+#     in this processed source and are therefore intentionally left
+#     unresolved.
+# ============================================================================
+
+candidate_trf_source:
+
+  relative_path:
+    "data/processed/m3/candidate_snptrf.parquet"
+
+  required:
+    true
+
+  expected_rows:
+    3
+
+  column_aliases:
+
+    # ----------------------------------------------------------------------
+    # Candidate variant identity
+    #
+    # canonical_rsid is preferred because it represents the standardized
+    # source rsID used in the M3 candidate artifact.
+    # ----------------------------------------------------------------------
+
+    lead_rsid:
+      - "canonical_rsid"
+      - "harm_variant_rsid"
+      - "m3_candidate_id"
+
+
+    # ----------------------------------------------------------------------
+    # tRF identity
+    #
+    # trf_id is preferred.
+    #
+    # harm_feature_id is retained only as a fallback harmonized identity.
+    # trf_raw is retained only as a final source-value fallback.
+    # ----------------------------------------------------------------------
+
+    trf_id:
+      - "trf_id"
+      - "harm_feature_id"
+      - "trf_raw"
+
+
+    # ----------------------------------------------------------------------
+    # Variant locus
+    #
+    # These coordinates describe the candidate/QTL variant.
+    # They do NOT describe the genomic coordinates of the tRF itself.
+    # ----------------------------------------------------------------------
+
+    chromosome:
+      - "chromosome"
+      - "harm_chromosome"
+
+    position:
+      - "position"
+      - "harm_position"
+
+
+    # ----------------------------------------------------------------------
+    # Disease context
+    # ----------------------------------------------------------------------
+
+    cancer_type:
+      - "cancer_type"
+      - "harm_disease_name"
+      - "harm_disease_tcga_code"
+
+
+    # ----------------------------------------------------------------------
+    # Biological tRF annotation
+    #
+    # No biological tRF subclass is assigned from harm_feature_type.
+    #
+    # harm_feature_type is a harmonization-level feature descriptor and is
+    # not automatically equivalent to biological classes such as:
+    #
+    #   5'-tRF
+    #   3'-tRF
+    #   tRF-1
+    #   tiRNA
+    #
+    # Therefore these biological fields remain unresolved in M6.4A unless
+    # explicitly supplied by a future source-supported annotation layer.
+    # ----------------------------------------------------------------------
+
+    trf_class: []
+
+    parent_trna: []
+
+    amino_acid: []
+
+    anticodon: []
+
+
+    # ----------------------------------------------------------------------
+    # tRF-QTL statistical evidence
+    # ----------------------------------------------------------------------
+
+    qtl_p_value:
+      - "p_value"
+
+    qtl_beta: []
+
+
+# ============================================================================
+# Additional source fields
+#
+# These fields are not currently required by the core M6.4A annotation
+# function, but document useful source-level evidence available in the M3
+# candidate artifact for later extension.
+# ============================================================================
+
+available_source_fields:
+
+  genome_build:
+    - "genome_build"
+    - "harm_source_genome_build"
+
+  qtl_fdr:
+    - "fdr"
+
+  variant_usable:
+    - "variant_usable"
+    - "harm_variant_rsid_usable"
+
+  trf_usable:
+    - "trf_usable"
+    - "harm_feature_usable"
+
+  qtl_usable:
+    - "qtl_usable"
+
+  standardization_status:
+    - "standardization_status"
+
+  candidate_stage:
+    - "m3_candidate_stage"
+
+  candidate_ranked:
+    - "m3_candidate_ranked"
+
+
+# ============================================================================
+# Coordinate policy
+#
+# Candidate SNP coordinates are retained for locus description only.
+#
+# They must NOT be interpreted as:
+#   - tRF coordinates;
+#   - regulatory-feature coordinates;
+#   - parent-gene coordinates.
+#
+# No coordinate-based gene assignment is performed in M6.4A.
+# ============================================================================
+
+coordinate_policy:
+
+  preferred_variant_chromosome_column:
+    "chromosome"
+
+  preferred_variant_position_column:
+    "position"
+
+  fallback_variant_chromosome_column:
+    "harm_chromosome"
+
+  fallback_variant_position_column:
+    "harm_position"
+
+  preserve_source_build:
+    true
+
+  liftover_performed:
+    false
+
+  cross_build_coordinate_join_performed:
+    false
+
+  variant_coordinate_used_as_trf_coordinate:
+    false
+
+  variant_coordinate_used_as_regulatory_feature_coordinate:
+    false
+
+  variant_coordinate_used_for_gene_assignment:
+    false
+
+
+# ============================================================================
+# tRF annotation policy
+#
+# M6.4A is source-conservative.
+#
+# The pipeline must not decode or infer biological tRF properties merely from
+# the identifier unless an explicit source-supported annotation layer exists.
+# ============================================================================
+
+trf_annotation_policy:
+
+  source_reported_trf_identity_only:
+    true
+
+  infer_trf_class_from_identifier:
+    false
+
+  infer_parent_trna_from_identifier:
+    false
+
+  infer_amino_acid_from_identifier:
+    false
+
+  infer_anticodon_from_identifier:
+    false
+
+  infer_trf_genomic_origin:
+    false
+
+  infer_trf_parent_gene:
+    false
+
+  treat_harm_feature_type_as_biological_trf_class:
+    false
+
+
+# ============================================================================
+# RNA-processing context
+#
+# These labels summarize evidence already established upstream.
+#
+# They do NOT represent causal or mechanistic conclusions.
+# ============================================================================
+
+rna_processing_context:
+
+  trf_qtl_context_label:
+    "TRF_QTL_ASSOCIATION"
+
+  regulatory_feature_context_label:
+    "ALTERNATIVE_RNA_PROCESSING_FEATURE"
+
+  intron_retention_context_label:
+    "INTRON_RETENTION"
+
+  combined_context_label:
+    "TRF_QTL_AND_ALTERNATIVE_RNA_PROCESSING_CONTEXT"
+
+  no_regulatory_feature_label:
+    "TRF_QTL_CONTEXT_WITHOUT_RETAINED_MORADI_FEATURE"
+
+
+# ============================================================================
+# Annotation status
+#
+# Current M3 source contains variant/tRF identity and locus context, but does
+# not currently contain biological tRF subclass, parent tRNA, amino acid, or
+# anticodon.
+#
+# Therefore the expected result for otherwise valid candidates is normally:
+#
+#   CANDIDATE_TRF_CONTEXT_PARTIALLY_ANNOTATED
+#
+# rather than COMPLETE.
+# ============================================================================
+
+annotation_status:
+
+  complete:
+    "CANDIDATE_TRF_CONTEXT_ANNOTATED"
+
+  partial:
+    "CANDIDATE_TRF_CONTEXT_PARTIALLY_ANNOTATED"
+
+  missing_trf:
+    "CANDIDATE_TRF_IDENTITY_UNAVAILABLE"
+
+  unresolved_gene:
+    "REGULATORY_GENE_UNRESOLVED"
+
+  no_regulatory_feature:
+    "NO_RETAINED_REGULATORY_FEATURE"
+
+
+# ============================================================================
+# Candidate interpretation policy
+# ============================================================================
+
+candidate_policy:
+
+  retain_candidate_without_biological_trf_subclass:
+    true
+
+  retain_candidate_without_parent_trna:
+    true
+
+  retain_candidate_without_resolved_gene:
+    true
+
+  retain_candidate_without_regulatory_feature:
+    true
+
+  missing_biological_annotation_interpreted_as_negative:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  nearest_gene_assignment_performed:
+    false
+
+  snp_proximity_gene_assignment_performed:
+    false
+
+  cis_proximity_gene_assignment_performed:
+    false
+
+  variant_coordinate_gene_assignment_performed:
+    false
+
+  trf_identifier_decoded:
+    false
+
+  trf_class_inferred:
+    false
+
+  trf_parent_gene_inferred:
+    false
+
+  parent_trna_inferred:
+    false
+
+  amino_acid_inferred:
+    false
+
+  anticodon_inferred:
+    false
+
+  candidate_locus_interpreted_as_gene:
+    false
+
+  candidate_locus_interpreted_as_trf_location:
+    false
+
+  harm_feature_type_interpreted_as_biological_trf_class:
+    false
+
+  missing_trf_annotation_interpreted_as_biological_absence:
+    false
+
+  unresolved_gene_interpreted_as_no_gene:
+    false
+
+  regulatory_feature_interpreted_as_causal:
+    false
+
+  trf_qtl_interpreted_as_causal:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Expected interpretation
+#
+# Based on the currently locked upstream state:
+#
+#   rs10216902
+#       candidate/tRF identity available
+#       regulatory feature = INT98200
+#       regulatory feature class = INTRON_RETENTION
+#       parent regulatory gene unresolved
+#
+#   rs2328376
+#       candidate/tRF identity available
+#       no retained Moradi regulatory feature
+#
+#   rs1288100
+#       candidate/tRF identity available
+#       no retained Moradi regulatory feature
+#
+# These expectations are descriptive only and are not hard-coded analytical
+# results.
+# ============================================================================
+
+expected_behavior:
+
+  candidate_count:
+    3
+
+  expected_candidate_trf_identity_available:
+    true
+
+  expected_biological_trf_subclass_available:
+    false
+
+  expected_parent_trna_available:
+    false
+
+  expected_gene_resolution:
+    false
+
+  expected_annotation_level:
+    "PARTIAL_SOURCE_SUPPORTED_CONTEXT"
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  id:
+    "M6.4B"
+
+  label:
+    "PATHWAY_READINESS_ASSESSMENT"
+
+  stage:
+    "M6.4B_PATHWAY_READINESS_ASSESSMENT"

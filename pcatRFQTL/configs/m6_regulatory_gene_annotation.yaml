@@ -1,0 +1,215 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_regulatory_gene_annotation.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.2B
+
+stage: regulatory_feature_to_source_gene_annotation
+
+
+# ============================================================================
+# Upstream M6.2A
+# ============================================================================
+
+upstream_qc:
+
+  regulatory_feature_mapping:
+
+    relative_path:
+      "data/processed/m6/qc/m6_2a_regulatory_feature_mapping.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.2A"
+
+    expected_stage:
+      "candidate_to_regulatory_feature_resolution"
+
+
+# ============================================================================
+# Source annotation search
+#
+# FASE addAnnotationRnaSeq uses an annotation matrix generated through the
+# FASE preprocessing workflow. This stage searches only for source-compatible
+# annotation artifacts.
+# ============================================================================
+
+source_annotation_search:
+
+  search_roots:
+    - "data/raw/moradi"
+    - "data/raw"
+    - "data/interim"
+    - "data/processed"
+
+  allowed_extensions:
+    - ".csv"
+    - ".tsv"
+    - ".txt"
+    - ".xlsx"
+    - ".xls"
+    - ".parquet"
+
+  feature_identifier_columns:
+    - "event"
+    - "splicing_event"
+    - "feature_id"
+    - "intron"
+    - "intron_id"
+
+  gene_identifier_columns:
+    - "gene"
+    - "gene_id"
+    - "gene_name"
+    - "gene_symbol"
+    - "ensembl_gene_id"
+
+  chromosome_columns:
+    - "chromosome"
+    - "chr"
+    - "seqnames"
+
+  start_columns:
+    - "start"
+    - "feature_start"
+    - "intron_start"
+
+  stop_columns:
+    - "stop"
+    - "end"
+    - "feature_end"
+    - "intron_end"
+
+  strand_columns:
+    - "strand"
+
+
+# ============================================================================
+# Resolution hierarchy
+# ============================================================================
+
+annotation_hierarchy:
+
+  SOURCE_REPORTED_FASE_ANNOTATION:
+    rank: 1
+
+  SOURCE_COMPATIBLE_EVENT_ANNOTATION:
+    rank: 2
+
+  SOURCE_COORDINATE_RECONSTRUCTION:
+    rank: 3
+
+  EXTERNAL_GTF_RECONSTRUCTION:
+    rank: 4
+
+  NEAREST_GENE:
+    rank: 99
+
+
+# ============================================================================
+# Current M6.2B policy
+# ============================================================================
+
+current_stage_policy:
+
+  allowed_annotation_classes:
+    - "SOURCE_REPORTED_FASE_ANNOTATION"
+    - "SOURCE_COMPATIBLE_EVENT_ANNOTATION"
+
+  coordinate_reconstruction_enabled:
+    false
+
+  external_gtf_reconstruction_enabled:
+    false
+
+  nearest_gene_enabled:
+    false
+
+
+# ============================================================================
+# Resolution statuses
+# ============================================================================
+
+resolution_status:
+
+  resolved:
+    "SOURCE_REPORTED_GENE_ANNOTATION_RESOLVED"
+
+  source_artifact_found_feature_absent:
+    "SOURCE_ANNOTATION_AVAILABLE_FEATURE_NOT_FOUND"
+
+  source_artifact_missing:
+    "SOURCE_ANNOTATION_ARTIFACT_NOT_AVAILABLE"
+
+  ambiguous:
+    "SOURCE_GENE_ANNOTATION_AMBIGUOUS"
+
+  pending_reconstruction:
+    "PENDING_M6_2C_SOURCE_COMPATIBLE_RECONSTRUCTION"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  feature_id_decoded_as_genomic_coordinate:
+    false
+
+  qtl_variant_position_used_as_feature_position:
+    false
+
+  tag_variant_position_used_as_feature_position:
+    false
+
+  nearest_gene_assignment_performed:
+    false
+
+  gene_assignment_from_cis_proximity_performed:
+    false
+
+  gene_assignment_from_snp_proximity_performed:
+    false
+
+  external_gtf_mapping_performed:
+    false
+
+  source_reported_annotation_preferred:
+    true
+
+  unresolved_feature_interpreted_as_no_gene:
+    false
+
+  regulatory_feature_treated_as_causal:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_resolved:
+    "M6.3_CANDIDATE_GENE_INTEGRATION"
+
+  if_unresolved:
+    "M6.2C_SOURCE_COMPATIBLE_EVENT_RECONSTRUCTION"

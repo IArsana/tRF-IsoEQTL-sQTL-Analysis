@@ -1,0 +1,226 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_open_small_rna_discovery.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: "M7.4A"
+
+stage: "open_small_rna_dataset_discovery"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  controlled_access_limitation:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3c_controlled_access_limitation.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.3C"
+
+    expected_stage:
+      "controlled_access_limitation_resolution"
+
+    expected_overall_status:
+      "CONTROLLED_ACCESS_UNAVAILABLE_AT_ANALYSIS_TIME"
+
+
+# ============================================================================
+# Dataset source-of-truth
+# ============================================================================
+
+dataset_registry:
+
+  relative_path:
+    "configs/datasets.yaml"
+
+  dataset_keys:
+
+    - "m7_gse80400"
+    - "m7_gse229904"
+    - "m7_gse89193"
+    - "m7_gse290219"
+
+
+# ============================================================================
+# Discovery scope
+# ============================================================================
+
+discovery_scope:
+
+  disease:
+    "prostate cancer"
+
+  organism:
+    "Homo sapiens"
+
+  target_molecule:
+    "tRNA-derived small RNA"
+
+  target_candidate:
+    "tRF-24-S3M8309N0Y"
+
+  exact_candidate_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  candidate_sequence_length_nt:
+    24
+
+
+# ============================================================================
+# Discovery inclusion criteria
+#
+# These are DISCOVERY criteria, not final quantification eligibility.
+# ============================================================================
+
+inclusion_criteria:
+
+  require_human:
+    true
+
+  require_prostate_context:
+    true
+
+  require_prostate_cancer_context:
+    true
+
+  require_high_throughput_small_or_non_coding_rna_sequencing:
+    true
+
+  require_public_dataset_record:
+    true
+
+  require_raw_sequence_route:
+    true
+
+
+# ============================================================================
+# Prioritization features
+#
+# No arbitrary additive score is used.
+# Hierarchical evidence classification only.
+# ============================================================================
+
+prioritization:
+
+  direct_trna_derived_rna_context_high_value:
+    true
+
+  tumor_normal_or_benign_comparison_high_value:
+    true
+
+  clinicopathologic_metadata_high_value:
+    true
+
+  recurrence_metadata_high_value:
+    true
+
+  large_sample_size_high_value:
+    true
+
+  raw_sra_reads_high_value:
+    true
+
+
+# ============================================================================
+# Statuses
+# ============================================================================
+
+statuses:
+
+  dataset:
+
+    high_priority:
+      "HIGH_PRIORITY_FOR_M7_4B_TECHNICAL_AUDIT"
+
+    intermediate_priority:
+      "INTERMEDIATE_PRIORITY_FOR_M7_4B_TECHNICAL_AUDIT"
+
+    exploratory:
+      "EXPLORATORY_FOR_M7_4B_TECHNICAL_AUDIT"
+
+    discovery_excluded:
+      "EXCLUDED_AT_DISCOVERY_STAGE"
+
+
+  overall:
+    candidates_identified:
+      "OPEN_SMALL_RNA_VALIDATION_DATASETS_IDENTIFIED"
+
+    none_identified:
+      "NO_OPEN_SMALL_RNA_VALIDATION_DATASET_IDENTIFIED"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  dataset_discovery_only:
+    true
+
+  raw_fastq_download_performed:
+    false
+
+  candidate_sequence_search_performed:
+    false
+
+  trf_quantification_performed:
+    false
+
+  differential_expression_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  technical_eligibility_claimed:
+    false
+
+  candidate_detected_claimed:
+    false
+
+  absent_candidate_claimed:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  sequence_inference_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_candidates_identified:
+    "M7.4B_EXTERNAL_SMALL_RNA_TECHNICAL_ELIGIBILITY"
+
+  if_none_identified:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

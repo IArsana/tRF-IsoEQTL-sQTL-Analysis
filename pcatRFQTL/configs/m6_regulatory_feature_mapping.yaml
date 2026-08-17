@@ -1,0 +1,310 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_regulatory_feature_mapping.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.2A
+
+stage: candidate_to_regulatory_feature_resolution
+
+
+# ============================================================================
+# Upstream candidate source
+#
+# Candidate → regulatory-feature assignments are inherited from M6.1.
+# They are NOT manually redefined here.
+# ============================================================================
+
+upstream_qc:
+
+  candidate_prioritization:
+
+    relative_path:
+      "data/processed/m6/qc/m6_1_candidate_prioritization.json"
+
+    required: true
+
+    expected_milestone: "M6.1"
+
+    expected_stage:
+      "final_candidate_prioritization"
+
+
+# ============================================================================
+# Moradi raw source tables
+# ============================================================================
+
+moradi_sources:
+
+  s1_cis_qtl:
+
+    relative_path:
+      "data/raw/moradi/Supplementary Table S1.xlsx"
+
+    sheet:
+      "Cis-intron-retention-sQTL-0.05"
+
+    feature_column:
+      "splicing_event"
+
+    variant_column:
+      "SNP"
+
+    variant_position_column:
+      "SNP_pos"
+
+    p_value_column:
+      "p_value"
+
+    fdr_column:
+      "FDR"
+
+    beta_column:
+      "beta"
+
+    maf_column:
+      "MAF"
+
+    required: true
+
+
+  s2_gwas_ld:
+
+    relative_path:
+      "data/raw/moradi/Supplementary Table S2.xlsx"
+
+    sheet:
+      "Cis-intron-sQTL-GWAS-LD_0.5"
+
+    feature_column:
+      "splicing_event"
+
+    qtl_variant_column:
+      "sQTL_SNP-pos"
+
+    qtl_position_column:
+      "sQTL_SNP"
+
+    tag_variant_column:
+      "tag_SNP_pos"
+
+    tag_position_column:
+      "tag_SNP"
+
+    ld_column:
+      "LD"
+
+    disease_column:
+      "gwas_cancer"
+
+    required: true
+
+
+  s7_differential_intron:
+
+    relative_path:
+      "data/raw/moradi/Supplementary Table S7_DE_INT_cis.csv"
+
+    feature_column:
+      "Unnamed: 0"
+
+    base_mean_column:
+      "baseMean"
+
+    log2_fold_change_column:
+      "log2FoldChange"
+
+    standard_error_column:
+      "lfcSE"
+
+    statistic_column:
+      "stat"
+
+    p_value_column:
+      "pvalue"
+
+    adjusted_p_value_column:
+      "padj"
+
+    required: true
+
+
+# ============================================================================
+# Disease context
+# ============================================================================
+
+disease_context:
+
+  primary_disease:
+    "prostate_cancer"
+
+  disease_aliases:
+    - "prostate_cancer"
+    - "prostate cancer"
+    - "prad"
+
+
+# ============================================================================
+# Feature interpretation
+# ============================================================================
+
+feature_policy:
+
+  supported_feature_prefixes:
+
+    INT:
+      feature_class:
+        "INTRON_RETENTION"
+
+    EX:
+      feature_class:
+        "CASSETTE_EXON"
+
+    ENST:
+      feature_class:
+        "ISOFORM"
+
+
+  expected_scope_for_int98200:
+    "CIS"
+
+  parent_gene_assignment_allowed:
+    false
+
+  nearest_gene_inference_allowed:
+    false
+
+  positional_gene_assignment_allowed:
+    false
+
+  source_reported_gene_required_for_gene_mapping:
+    true
+
+  unresolved_parent_gene_status:
+    "PENDING_SOURCE_ANNOTATION"
+
+
+# ============================================================================
+# Evidence definitions
+# ============================================================================
+
+evidence_policy:
+
+  s1_qtl_support:
+
+    requires_exact_feature_match:
+      true
+
+    minimum_rows:
+      1
+
+
+  s2_gwas_ld_context:
+
+    requires_exact_feature_match:
+      true
+
+    requires_primary_disease:
+      true
+
+    minimum_rows:
+      1
+
+
+  s7_differential_support:
+
+    requires_exact_feature_match:
+      true
+
+    adjusted_p_value_threshold:
+      0.05
+
+
+# ============================================================================
+# Candidate resolution statuses
+# ============================================================================
+
+resolution_status:
+
+  feature_confirmed:
+    "REGULATORY_FEATURE_CONFIRMED_GENE_ANNOTATION_PENDING"
+
+  no_feature_assigned:
+    "NO_RETAINED_MORADI_REGULATORY_FEATURE"
+
+  feature_not_found:
+    "ASSIGNED_REGULATORY_FEATURE_NOT_FOUND_IN_RAW_MORADI"
+
+  feature_partially_confirmed:
+    "REGULATORY_FEATURE_PARTIALLY_CONFIRMED"
+
+  feature_annotation_pending:
+    "PENDING_SOURCE_ANNOTATION"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  candidate_feature_assignment_recomputed:
+    false
+
+  candidate_feature_assignment_inherited_from_m6_1:
+    true
+
+  raw_moradi_files_modified:
+    false
+
+  parent_gene_inferred:
+    false
+
+  nearest_gene_mapping_performed:
+    false
+
+  positional_gene_mapping_performed:
+    false
+
+  regulatory_feature_treated_as_causal:
+    false
+
+  differential_expression_treated_as_causal:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  id:
+    "M6.2B"
+
+  label:
+    "REGULATORY_FEATURE_TO_GENE_ANNOTATION"
+
+  required_for_features_with_unresolved_parent_gene:
+    true

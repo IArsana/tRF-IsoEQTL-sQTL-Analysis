@@ -1,0 +1,382 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_trf_quantification_feasibility.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.3B
+
+stage: trf_quantification_feasibility
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  trf_sequence_resolution:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3a_trf_sequence_resolution.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.3A"
+
+    expected_stage:
+      "candidate_trf_sequence_resolution"
+
+    expected_overall_status:
+      "PARTIAL_CANDIDATE_TRF_SEQUENCE_RESOLUTION"
+
+
+  endpoint_resolution:
+
+    relative_path:
+      "data/processed/m7/qc/m7_2b_endpoint_resolution.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.2B"
+
+    expected_stage:
+      "clinical_endpoint_readiness_resolution"
+
+
+# ============================================================================
+# Target resource
+# ============================================================================
+
+target_resource:
+
+  repository:
+    "NCI_GDC"
+
+  project_id:
+    "TCGA-PRAD"
+
+  experimental_strategy:
+    "miRNA-Seq"
+
+  genome_alignment_build:
+    "GRCh38"
+
+
+# ============================================================================
+# GDC API
+# ============================================================================
+
+gdc_api:
+
+  files_endpoint:
+    "https://api.gdc.cancer.gov/files"
+
+  timeout_seconds:
+    120
+
+  page_size:
+    5000
+
+  verify_ssl:
+    true
+
+  fields:
+
+    - "file_id"
+    - "file_name"
+    - "data_category"
+    - "data_type"
+    - "data_format"
+    - "experimental_strategy"
+    - "access"
+    - "file_size"
+    - "md5sum"
+    - "state"
+
+    - "cases.case_id"
+    - "cases.submitter_id"
+    - "cases.project.project_id"
+
+    - "cases.samples.sample_id"
+    - "cases.samples.submitter_id"
+    - "cases.samples.sample_type"
+    - "cases.samples.tissue_type"
+
+    - "analysis.workflow_type"
+    - "analysis.workflow_version"
+
+  expand:
+
+    - "cases"
+    - "cases.project"
+    - "cases.samples"
+    - "analysis"
+
+
+# ============================================================================
+# Query-scope policy
+#
+# IMPORTANT:
+# Project membership is enforced by the GDC query filter.
+#
+# Row-level returned metadata and query scope are tracked separately:
+#
+#   target_project_query_scoped = True
+#       means the API query was restricted to TCGA-PRAD.
+#
+#   target_project_observed = True
+#       means TCGA-PRAD was explicitly present in the nested metadata
+#       returned for that file.
+#
+# Missing nested project metadata is NOT interpreted as project confirmation.
+# ============================================================================
+
+query_scope_policy:
+
+  require_project_filter:
+    true
+
+  require_experimental_strategy_filter:
+    true
+
+  distinguish_query_scope_from_returned_metadata:
+    true
+
+  missing_project_metadata_means_confirmed:
+    false
+
+
+# ============================================================================
+# Resource classes
+# ============================================================================
+
+resource_classes:
+
+  aligned_mirna_reads:
+
+    required_experimental_strategy:
+      "miRNA-Seq"
+
+    required_data_type:
+      "Aligned Reads"
+
+    required_data_format:
+      "BAM"
+
+    accepted_for_direct_trf_quantification:
+      true
+
+
+  mirna_expression_quantification:
+
+    required_experimental_strategy:
+      "miRNA-Seq"
+
+    required_data_type:
+      "miRNA Expression Quantification"
+
+    accepted_for_direct_trf_quantification:
+      false
+
+
+  isoform_expression_quantification:
+
+    required_experimental_strategy:
+      "miRNA-Seq"
+
+    required_data_type:
+      "Isoform Expression Quantification"
+
+    accepted_for_direct_trf_quantification:
+      false
+
+
+# ============================================================================
+# Quantification policy
+# ============================================================================
+
+quantification_policy:
+
+  require_source_supported_exact_sequence:
+    true
+
+  require_sequence_validation_passed:
+    true
+
+  require_aligned_mirna_reads:
+    true
+
+  require_bam_format:
+    true
+
+  require_case_mapping:
+    true
+
+  require_tcga_prad_project:
+    true
+
+  require_mirna_seq_strategy:
+    true
+
+  allow_processed_mirna_as_trf_measurement:
+    false
+
+  allow_processed_isoform_as_trf_measurement:
+    false
+
+  allow_mrna_rnaseq_as_substitute:
+    false
+
+  allow_sequence_inference:
+    false
+
+  allow_candidate_substitution:
+    false
+
+  allow_unresolved_candidate_quantification:
+    false
+
+
+# ============================================================================
+# Access policy
+# ============================================================================
+
+access_policy:
+
+  controlled_access_is_resource_available:
+    true
+
+  controlled_access_is_immediately_quantifiable:
+    false
+
+  require_authorized_access_before_read_counting:
+    true
+
+  open_access_bam_immediately_quantifiable:
+    true
+
+  do_not_download_controlled_files_in_m7_3b:
+    true
+
+
+# ============================================================================
+# Feasibility statuses
+# ============================================================================
+
+statuses:
+
+  candidate:
+
+    sequence_unresolved:
+      "TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+    no_aligned_reads:
+      "TRF_QUANTIFICATION_BLOCKED_NO_ALIGNED_MIRNA_READS"
+
+    controlled_access_required:
+      "TRF_QUANTIFICATION_FEASIBLE_CONTROLLED_ACCESS_REQUIRED"
+
+    open_access_ready:
+      "TRF_QUANTIFICATION_RESOURCE_READY"
+
+    resource_inventory_incomplete:
+      "TRF_QUANTIFICATION_FEASIBILITY_UNRESOLVED_RESOURCE_INVENTORY"
+
+
+  overall:
+
+    direct_ready:
+      "TRF_QUANTIFICATION_DIRECT_RESOURCE_READY"
+
+    controlled_route:
+      "TRF_QUANTIFICATION_FEASIBLE_VIA_CONTROLLED_ACCESS"
+
+    blocked:
+      "TRF_QUANTIFICATION_BLOCKED"
+
+    partial:
+      "PARTIAL_TRF_QUANTIFICATION_FEASIBILITY"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  tcga_trf_quantification_performed:
+    false
+
+  bam_download_performed:
+    false
+
+  bam_alignment_performed:
+    false
+
+  read_counting_performed:
+    false
+
+  processed_mirna_used_as_trf_measurement:
+    false
+
+  processed_isoform_used_as_trf_measurement:
+    false
+
+  mrna_rnaseq_used_as_substitute:
+    false
+
+  unresolved_trf_quantified:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  sequence_inference_performed:
+    false
+
+  project_membership_inferred_from_missing_metadata:
+    false
+
+  expression_association_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_direct_ready:
+    "M7.3C_TRF_READ_COUNTING"
+
+  if_controlled_access_required:
+    "M7.3C_CONTROLLED_ACCESS_TRF_QUANTIFICATION"
+
+  if_all_blocked:
+    "M7.4_CLINICAL_VALIDATION_WITHOUT_TRF_EXPRESSION"
+
+  unresolved_candidates:
+    "RETAIN_SEQUENCE_UNRESOLVED_CANDIDATES"

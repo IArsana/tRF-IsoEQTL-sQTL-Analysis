@@ -1,0 +1,713 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_full_summary_statistics_audit.yaml
+#
+# Description:
+#   M7.5B Full Summary Statistics Audit.
+#
+#   Workflow:
+#     1. Discover prostate-related GWAS studies through GWAS Catalog REST V2.
+#     2. Retain studies with public full summary statistics.
+#     3. Screen for direct prostate-cancer phenotypes.
+#     4. Resolve one preferred summary-statistics representation per study.
+#     5. Prefer harmonised *.h.tsv.gz where available.
+#     6. Support compressed and uncompressed original TSV files.
+#     7. Stream each selected file to EOF.
+#     8. Search exact candidate rsIDs only.
+#     9. Preserve study independence and harmonization as unresolved.
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+
+milestone:
+  "M7.5B"
+
+stage:
+  "full_summary_statistics_audit"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  m7_5:
+
+    relative_path:
+      "data/processed/m7/qc/m7_5_variant_validation_feasibility.json"
+
+    expected_milestone:
+      "M7.5"
+
+    expected_stage:
+      "variant_level_validation_feasibility"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "NO_CURATED_VARIANT_EVIDENCE_FULL_SUMMARY_STATISTICS_AUDIT_REQUIRED"
+
+    required_summary_state:
+
+      candidates_assessed:
+        3
+
+      api_queries_successful:
+        3
+
+      api_queries_zero_curated_results:
+        3
+
+      independent_replications_verified:
+        0
+
+      independent_replication_claimed:
+        false
+
+      full_summary_statistics_audit_performed:
+        false
+
+      tcga_germline_deferred_controlled_access:
+        true
+
+
+# ============================================================================
+# Candidate variants
+# ============================================================================
+
+candidates:
+
+  - rsid: "rs10216902"
+    priority_rank: 1
+    priority_class: "HIGH_PRIORITY"
+    chromosome: "8"
+    position: 95479978
+
+  - rsid: "rs2328376"
+    priority_rank: 2
+    priority_class: "INTERMEDIATE_PRIORITY"
+    chromosome: "6"
+    position: 19413587
+
+  - rsid: "rs1288100"
+    priority_rank: 3
+    priority_class: "LOWER_PRIORITY"
+    chromosome: "15"
+    position: 45142377
+
+
+# ============================================================================
+# Previously used M5 studies
+# ============================================================================
+
+previously_used_gwas:
+
+  study_accessions:
+
+    - "GCST90274713"
+    - "GCST90274714"
+    - "GCST90274716"
+
+  reused_study_is_new_validation:
+    false
+
+  different_accession_establishes_independence:
+    false
+
+  related_analysis_independence_verified:
+    false
+
+
+# ============================================================================
+# GWAS Catalog REST API V2 study discovery
+# ============================================================================
+
+study_discovery:
+
+  provider:
+    "NHGRI_EBI_GWAS_CATALOG"
+
+  api_version:
+    "V2"
+
+  base_url:
+    "https://www.ebi.ac.uk/gwas/rest/api/v2"
+
+  endpoint:
+    "/studies"
+
+  trait_parameter:
+    "efo_trait"
+
+  trait_query:
+    "prostate cancer"
+
+  show_child_traits_parameter:
+    "show_child_traits"
+
+  show_child_traits:
+    true
+
+  page_parameter:
+    "page"
+
+  size_parameter:
+    "size"
+
+  page_size:
+    100
+
+  start_page:
+    0
+
+  timeout_seconds:
+    120
+
+  max_retries:
+    3
+
+  retry_backoff_seconds:
+    3
+
+  client_queries_per_second:
+    5
+
+  user_agent:
+    "pcatRFQTL/1.0 M7.5B full-summary-statistics-audit"
+
+  raw_snapshot_directory:
+    "data/raw/m7/variant_validation/full_sumstats/study_discovery"
+
+  reuse_existing_raw_snapshots:
+    true
+
+  immutable_raw:
+    true
+
+
+# ============================================================================
+# Full-summary-statistics availability
+#
+# Confirmed live REST V2 fields:
+#
+#   full_summary_stats_available
+#   full_summary_stats
+# ============================================================================
+
+study_eligibility:
+
+  availability_field:
+    "full_summary_stats_available"
+
+  route_field:
+    "full_summary_stats"
+
+  require_availability_boolean_true:
+    true
+
+
+# ============================================================================
+# Phenotype screening
+#
+# This controls entry into direct disease exact-rsID scanning.
+# It is NOT final phenotype harmonization.
+# ============================================================================
+
+phenotype_eligibility:
+
+  direct_disease_only:
+    true
+
+  accepted_exact_traits:
+
+    - "Prostate cancer"
+    - "High-risk prostate cancer"
+    - "ICD10 C61: Malignant neoplasm of prostate"
+    - "Primary malignancy prostate"
+
+  accepted_trait_prefixes:
+
+    - "Prostate cancer (UKB data field 20001)"
+
+  excluded_trait_fragments:
+
+    - "Illnesses of father"
+    - "Illnesses of siblings"
+    - "Takes medication for prostate cancer"
+    - "Gene-based burden"
+
+  exclusion_is_negative_evidence:
+    false
+
+  unresolved_is_negative_evidence:
+    false
+
+  final_phenotype_compatibility_verified:
+    false
+
+
+# ============================================================================
+# Summary-statistics acquisition and lookup
+# ============================================================================
+
+summary_statistics:
+
+  public_collection:
+
+    timeout_seconds:
+      900
+
+    user_agent:
+      "pcatRFQTL/1.0 M7.5B full-summary-statistics-audit"
+
+
+  file_selection:
+
+    use_study_provided_url:
+      true
+
+    prefer_harmonised:
+      true
+
+    harmonised_subdirectory:
+      "harmonised"
+
+    harmonised_preferred_suffix:
+      ".h.tsv.gz"
+
+    formatted_suffix:
+      ".f.tsv.gz"
+
+    accepted_root_suffixes:
+
+      - ".tsv.gz"
+      - ".txt.gz"
+      - ".tsv"
+      - ".txt"
+
+    ignored_name_fragments:
+
+      - "-meta.yaml"
+      - ".md5"
+      - ".sha256"
+      - "md5sum"
+      - "README"
+
+    select_one_file_per_study:
+      true
+
+    selection_priority:
+
+      - "HARMONISED_H"
+      - "ROOT_TSV_GZ"
+      - "ROOT_TXT_GZ"
+      - "ROOT_TSV"
+      - "ROOT_TXT"
+
+    formatted_file_is_fallback:
+      false
+
+
+  lookup:
+
+    mode:
+      "STREAM_EXACT_RSID"
+
+    exact_rsid_only:
+      true
+
+    coordinate_fallback:
+      false
+
+    proxy_variant_lookup:
+      false
+
+    rsid_reconstruction:
+      false
+
+    candidate_substitution:
+      false
+
+    stop_after_all_candidates_found:
+      false
+
+
+  column_aliases:
+
+    rs_id:
+
+      - "rs_id"
+      - "rsid"
+      - "RSID"
+      - "SNP"
+      - "snp"
+      - "variant_id"
+
+    chromosome:
+
+      - "chromosome"
+      - "chr"
+      - "CHR"
+
+    base_pair_location:
+
+      - "base_pair_location"
+      - "position"
+      - "pos"
+      - "POS"
+      - "BP"
+
+    effect_allele:
+
+      - "effect_allele"
+      - "EA"
+      - "A1"
+
+    other_allele:
+
+      - "other_allele"
+      - "OA"
+      - "A2"
+
+    effect_allele_frequency:
+
+      - "effect_allele_frequency"
+      - "eaf"
+      - "EAF"
+
+    beta:
+
+      - "beta"
+      - "BETA"
+
+    odds_ratio:
+
+      - "odds_ratio"
+      - "OR"
+
+    standard_error:
+
+      - "standard_error"
+      - "se"
+      - "SE"
+
+    p_value:
+
+      - "p_value"
+      - "pvalue"
+      - "P"
+      - "PVAL"
+
+    neg_log_10_p_value:
+
+      - "neg_log_10_p_value"
+
+
+# ============================================================================
+# Provenance
+# ============================================================================
+
+provenance:
+
+  save_full_summary_statistics_files:
+    false
+
+  stream_remote_files:
+    true
+
+  calculate_complete_source_file_sha256:
+    true
+
+  require_eof_for_successful_scan:
+    true
+
+  candidate_not_found_is_negative_evidence:
+    false
+
+
+# ============================================================================
+# Classification safeguards
+# ============================================================================
+
+classification:
+
+  exact_rsid_required:
+    true
+
+  coordinate_match_is_exact_validation:
+    false
+
+  proxy_match_is_exact_validation:
+    false
+
+  candidate_substitution_allowed:
+    false
+
+  reused_study_is_new_validation:
+    false
+
+  nonreused_study_is_independent_validation:
+    false
+
+  different_accession_establishes_independence:
+    false
+
+  phenotype_compatibility_verified:
+    false
+
+  ancestry_compatibility_verified:
+    false
+
+  sample_independence_verified:
+    false
+
+  effect_allele_harmonization_performed:
+    false
+
+  effect_direction_concordance_performed:
+    false
+
+  candidate_not_found_means_no_association:
+    false
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  phenotype:
+
+    direct:
+      "DIRECT_PROSTATE_CANCER_PHENOTYPE"
+
+    excluded:
+      "EXCLUDED_NON_DIRECT_PROSTATE_PHENOTYPE"
+
+    unresolved:
+      "PHENOTYPE_ELIGIBILITY_UNRESOLVED"
+
+
+  study:
+
+    eligible:
+      "DIRECT_PROSTATE_GWAS_FULL_SUMMARY_STATISTICS_AVAILABLE"
+
+    no_full_sumstats:
+      "FULL_SUMMARY_STATISTICS_NOT_AVAILABLE"
+
+    phenotype_excluded:
+      "FULL_SUMMARY_STATISTICS_AVAILABLE_PHENOTYPE_NOT_DIRECT"
+
+    phenotype_unresolved:
+      "FULL_SUMMARY_STATISTICS_AVAILABLE_PHENOTYPE_UNRESOLVED"
+
+
+  file:
+
+    harmonised:
+      "HARMONISED_SUMMARY_STATISTICS_FILE_SELECTED"
+
+    root_compressed:
+      "ORIGINAL_COMPRESSED_SUMMARY_STATISTICS_FILE_SELECTED"
+
+    root_uncompressed:
+      "ORIGINAL_UNCOMPRESSED_SUMMARY_STATISTICS_FILE_SELECTED"
+
+    unavailable:
+      "SUMMARY_STATISTICS_FILE_LAYOUT_UNRESOLVED"
+
+    scan_success:
+      "SUMMARY_STATISTICS_FILE_SCANNED_SUCCESSFULLY"
+
+    scan_failed:
+      "SUMMARY_STATISTICS_FILE_SCAN_FAILED"
+
+
+  association:
+
+    exact_reused:
+      "EXACT_VARIANT_FOUND_PREVIOUSLY_USED_STUDY"
+
+    exact_nonreused:
+      "EXACT_VARIANT_FOUND_NONREUSED_STUDY_INDEPENDENCE_UNRESOLVED"
+
+    not_found:
+      "EXACT_VARIANT_NOT_FOUND_IN_AUDITED_STUDY"
+
+    not_auditable:
+      "EXACT_VARIANT_LOOKUP_NOT_AUDITABLE"
+
+
+  candidate:
+
+    nonreused_found:
+      "EXACT_VARIANT_FOUND_IN_NONREUSED_FULL_SUMMARY_STATISTICS_INDEPENDENCE_UNRESOLVED"
+
+    reused_only:
+      "EXACT_VARIANT_FOUND_ONLY_IN_PREVIOUSLY_USED_FULL_SUMMARY_STATISTICS"
+
+    not_found:
+      "EXACT_VARIANT_NOT_FOUND_IN_AUDITED_FULL_SUMMARY_STATISTICS"
+
+    incomplete:
+      "FULL_SUMMARY_STATISTICS_AUDIT_INCOMPLETE"
+
+
+  overall:
+
+    nonreused_evidence:
+      "FULL_SUMMARY_STATISTICS_EXACT_VARIANT_EVIDENCE_AVAILABLE_INDEPENDENCE_UNRESOLVED"
+
+    reused_only:
+      "FULL_SUMMARY_STATISTICS_EVIDENCE_LIMITED_TO_PREVIOUSLY_USED_STUDIES"
+
+    no_exact_variants:
+      "NO_EXACT_VARIANT_FOUND_IN_AUDITED_FULL_SUMMARY_STATISTICS"
+
+    incomplete:
+      "FULL_SUMMARY_STATISTICS_AUDIT_INCOMPLETE"
+
+
+# ============================================================================
+# Scientific policy
+# ============================================================================
+
+scientific_policy:
+
+  full_summary_statistics_audit_performed:
+    true
+
+  direct_disease_phenotype_screening_performed:
+    true
+
+  phenotype_screening_is_final_harmonization:
+    false
+
+  exact_rsid_lookup_only:
+    true
+
+  coordinate_substitution_performed:
+    false
+
+  proxy_variant_lookup_performed:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  independent_replication_claimed:
+    false
+
+  study_independence_verified:
+    false
+
+  phenotype_compatibility_verified:
+    false
+
+  ancestry_compatibility_verified:
+    false
+
+  effect_allele_harmonization_performed:
+    false
+
+  effect_direction_concordance_claimed:
+    false
+
+  meta_analysis_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  colocalization_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+  excluded_phenotype_interpreted_as_negative_evidence:
+    false
+
+  candidate_not_found_interpreted_as_no_disease_association:
+    false
+
+
+# ============================================================================
+# Validation
+# ============================================================================
+
+validation:
+
+  expected_candidate_count:
+    3
+
+  expected_rsids:
+
+    - "rs10216902"
+    - "rs2328376"
+    - "rs1288100"
+
+  require_independent_replication_false:
+    true
+
+  require_no_coordinate_substitution:
+    true
+
+  require_no_proxy_lookup:
+    true
+
+  require_no_candidate_substitution:
+    true
+
+  require_full_stream_scan:
+    true
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/full_summary_statistics_audit"
+
+  study_inventory_filename:
+    "prostate_gwas_study_inventory.parquet"
+
+  file_manifest_filename:
+    "full_summary_statistics_file_manifest.parquet"
+
+  exact_variant_hits_filename:
+    "exact_variant_full_sumstats_hits.parquet"
+
+  study_candidate_audit_filename:
+    "study_candidate_exact_variant_audit.parquet"
+
+  candidate_resolution_filename:
+    "candidate_full_sumstats_resolution.parquet"
+
+  summary_filename:
+    "full_summary_statistics_audit_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_5b_full_summary_statistics_audit.json"
+
+
+next_stage:
+  "M7.5C_STUDY_INDEPENDENCE_AND_HARMONIZATION_AUDIT"

@@ -1,0 +1,334 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_external_trf_raw_read_acquisition.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone:
+  "M7.4C.1"
+
+stage:
+  "external_trf_raw_read_acquisition_audit"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  technical_eligibility:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4b_external_small_rna_technical_eligibility.json"
+
+    expected_milestone:
+      "M7.4B"
+
+    expected_stage:
+      "external_small_rna_technical_eligibility"
+
+    expected_overall_status:
+      "EXTERNAL_SMALL_RNA_QUANTIFICATION_ROUTE_AVAILABLE"
+
+
+# ============================================================================
+# Candidate
+# ============================================================================
+
+candidate:
+
+  lead_rsid:
+    "rs10216902"
+
+  trf_id:
+    "tRF-24-S3M8309N0Y"
+
+  exact_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  sequence_length_nt:
+    24
+
+  sequence_source_supported:
+    true
+
+
+# ============================================================================
+# Pilot dataset
+# ============================================================================
+
+pilot_dataset:
+
+  dataset_key:
+    "m7_gse80400"
+
+  geo_accession:
+    "GSE80400"
+
+  sra_study:
+    "SRP073456"
+
+  bioproject:
+    "PRJNA318802"
+
+  expected_technical_status:
+    "TECHNICALLY_ELIGIBLE_WITH_CAVEATS"
+
+
+# ============================================================================
+# Canonical dataset registry
+# ============================================================================
+
+dataset_registry:
+
+  relative_path:
+    "configs/datasets.yaml"
+
+
+# ============================================================================
+# SRA metadata acquisition
+# ============================================================================
+
+sra_metadata:
+
+  provider:
+    "NCBI_SRA"
+
+  backend:
+    "SRA_DATABASE_BACKEND"
+
+  endpoint:
+    "https://trace.ncbi.nlm.nih.gov/Traces/sra-db-be/runinfo"
+
+  accession_parameter:
+    "acc"
+
+  query_accession:
+    "SRP073456"
+
+  timeout_seconds:
+    120
+
+  user_agent:
+    "pcatRFQTL/1.0 M7.4C.1 research metadata acquisition"
+
+  raw_snapshot_relative_path:
+    "data/raw/m7/gse80400/sra/SraRunInfo.csv"
+
+  raw_snapshot_metadata_relative_path:
+    "data/raw/m7/gse80400/sra/SraRunInfo.metadata.json"
+
+  immutable_raw:
+    true
+
+
+# ============================================================================
+# Processed outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/external_trf_raw_read_acquisition"
+
+  run_inventory_filename:
+    "gse80400_sra_run_inventory.parquet"
+
+  acquisition_manifest_filename:
+    "gse80400_acquisition_manifest.parquet"
+
+  summary_filename:
+    "external_trf_raw_read_acquisition_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_4c1_external_trf_raw_read_acquisition.json"
+
+
+# ============================================================================
+# Expected metadata
+# ============================================================================
+
+expected_metadata:
+
+  organism:
+    "Homo sapiens"
+
+  library_strategy:
+    "ncRNA-Seq"
+
+  library_layout:
+    "SINGLE"
+
+  platform:
+    "ILLUMINA"
+
+  minimum_runs:
+    1
+
+  require_public_runs:
+    true
+
+
+# ============================================================================
+# Acquisition planning
+# ============================================================================
+
+acquisition_policy:
+
+  create_download_manifest:
+    true
+
+  download_raw_reads:
+    false
+
+  run_prefetch:
+    false
+
+  run_fasterq_dump:
+    false
+
+  inspect_fastq:
+    false
+
+  trim_adapters:
+    false
+
+  perform_quality_filtering:
+    false
+
+  candidate_sequence_search:
+    false
+
+  candidate_exact_counting:
+    false
+
+  candidate_approximate_counting:
+    false
+
+  quantify_trf:
+    false
+
+
+# ============================================================================
+# Toolchain audit
+# ============================================================================
+
+toolchain:
+
+  required_for_next_stage:
+
+    - "prefetch"
+    - "fasterq-dump"
+
+  required_now:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  run_level_metadata_acquisition_performed:
+    true
+
+  raw_sequence_download_performed:
+    false
+
+  fastq_generation_performed:
+    false
+
+  raw_read_inspection_performed:
+    false
+
+  adapter_trimming_performed:
+    false
+
+  quality_filtering_performed:
+    false
+
+  candidate_sequence_search_performed:
+    false
+
+  exact_match_counting_performed:
+    false
+
+  approximate_match_counting_performed:
+    false
+
+  trf_quantification_performed:
+    false
+
+  candidate_detected_claimed:
+    false
+
+  candidate_absent_claimed:
+    false
+
+  parent_trna_inference_performed:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  acquisition:
+
+    ready:
+      "RAW_READ_ACQUISITION_MANIFEST_READY"
+
+    ready_toolchain_missing:
+      "RAW_READ_ACQUISITION_MANIFEST_READY_TOOLCHAIN_NOT_AVAILABLE"
+
+    metadata_incomplete:
+      "RAW_READ_ACQUISITION_BLOCKED_METADATA_INCOMPLETE"
+
+    no_public_runs:
+      "RAW_READ_ACQUISITION_BLOCKED_NO_PUBLIC_RUNS"
+
+
+  overall:
+
+    ready:
+      "EXTERNAL_RAW_READ_ACQUISITION_READY"
+
+    blocked:
+      "EXTERNAL_RAW_READ_ACQUISITION_NOT_READY"
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_ready:
+    "M7.4C.2_EXACT_CANDIDATE_SEQUENCE_COUNTING"
+
+  if_blocked:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

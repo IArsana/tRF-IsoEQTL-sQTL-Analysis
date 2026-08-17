@@ -1,0 +1,487 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_external_small_rna_technical_eligibility.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: "M7.4B"
+
+stage: "external_small_rna_technical_eligibility"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  open_small_rna_discovery:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4a_open_small_rna_dataset_discovery.json"
+
+    expected_milestone:
+      "M7.4A"
+
+    expected_stage:
+      "open_small_rna_dataset_discovery"
+
+    expected_overall_status:
+      "OPEN_SMALL_RNA_VALIDATION_DATASETS_IDENTIFIED"
+
+
+# ============================================================================
+# Canonical dataset registry
+# ============================================================================
+
+dataset_registry:
+
+  relative_path:
+    "configs/datasets.yaml"
+
+  dataset_keys:
+
+    - "m7_gse80400"
+    - "m7_gse229904"
+    - "m7_gse89193"
+    - "m7_gse290219"
+
+
+# ============================================================================
+# Candidate being audited
+# ============================================================================
+
+candidate:
+
+  lead_rsid:
+    "rs10216902"
+
+  trf_id:
+    "tRF-24-S3M8309N0Y"
+
+  exact_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  sequence_length_nt:
+    24
+
+  sequence_source_supported:
+    true
+
+
+# ============================================================================
+# Technical eligibility criteria
+#
+# M7.4B determines whether raw sequence data are technically suitable for
+# exact-sequence auditing in M7.4C.
+#
+# It does NOT establish that the candidate is actually present.
+# ============================================================================
+
+technical_criteria:
+
+  require_public_raw_sequence:
+    true
+
+  require_small_rna_or_ncrna_library:
+    true
+
+  require_size_fractionation_or_explicit_small_rna_protocol:
+    true
+
+  require_candidate_length_compatible:
+    true
+
+  require_read_orientation_resolvable:
+    true
+
+  require_adapter_handling_resolvable:
+    true
+
+
+# ============================================================================
+# Technical evidence audit
+#
+# These fields record what has been established from public source metadata.
+# They do NOT report candidate detection.
+# ============================================================================
+
+dataset_audit:
+
+  m7_gse80400:
+
+    metadata_source_verified:
+      true
+
+    raw_sequence_public:
+      true
+
+    raw_sequence_repository:
+      "SRA"
+
+    library_strategy:
+      "ncRNA-Seq"
+
+    library_source:
+      "transcriptomic"
+
+    library_selection:
+      "size fractionation"
+
+    small_rna_protocol:
+      "Illumina Small RNA Sample Preparation"
+
+    read_mode:
+      "single"
+
+    candidate_length_compatible:
+      true
+
+    documented_processed_read_min_nt:
+      15
+
+    documented_processed_read_max_nt:
+      35
+
+    candidate_length_within_documented_range:
+      true
+
+    adapter_information_available:
+      true
+
+    documented_adapter_sequence:
+      "CAAGCAGAAGACGGCATACGA"
+
+    adapter_orientation_note:
+      "adapter screened on minus strand in original processing"
+
+    read_orientation_resolvable:
+      true
+
+    original_pipeline_trf_aware:
+      true
+
+    original_pipeline_trf_or_trna_derived_rna_reported:
+      true
+
+    ffpe:
+      false
+
+    technical_caveats:
+
+      - "Original processing allowed mismatches for annotation."
+      - "M7.4C exact-sequence counting must not inherit original annotation mismatches."
+      - "Exact sequence abundance does not establish parent tRNA origin."
+      - "Adapter handling must be verified against raw SRA representation before counting."
+
+    evidence_status:
+      "SOURCE_METADATA_SUFFICIENT"
+
+
+  m7_gse229904:
+
+    metadata_source_verified:
+      true
+
+    raw_sequence_public:
+      true
+
+    raw_sequence_repository:
+      "SRA"
+
+    library_strategy:
+      "miRNA-Seq"
+
+    library_source:
+      "transcriptomic"
+
+    library_selection:
+      "size fractionation"
+
+    small_rna_protocol:
+      "NEBNext Small RNA Library Prep Set for Illumina"
+
+    read_mode:
+      "single"
+
+    candidate_length_compatible:
+      true
+
+    documented_processed_read_min_nt:
+      null
+
+    documented_processed_read_max_nt:
+      null
+
+    candidate_length_within_documented_range:
+      null
+
+    adapter_information_available:
+      false
+
+    documented_adapter_sequence:
+      null
+
+    read_orientation_resolvable:
+      true
+
+    original_pipeline_trf_aware:
+      false
+
+    original_pipeline_trf_or_trna_derived_rna_reported:
+      false
+
+    ffpe:
+      false
+
+    technical_caveats:
+
+      - "Raw library is miRNA-Seq rather than explicitly tRF-targeted."
+      - "Exact adapter sequence is not yet source-resolved in the current metadata snapshot."
+      - "Candidate 24-nt compatibility is supported by small-RNA size fractionation, but raw read-length distribution must be confirmed before quantification."
+      - "Processed miRNA counts must not be used as tRF measurements."
+
+    evidence_status:
+      "SOURCE_METADATA_SUFFICIENT_WITH_CAVEATS"
+
+
+  m7_gse89193:
+
+    metadata_source_verified:
+      true
+
+    raw_sequence_public:
+      true
+
+    raw_sequence_repository:
+      "SRA"
+
+    library_strategy:
+      "miRNA-Seq"
+
+    library_source:
+      "transcriptomic"
+
+    library_selection:
+      "size fractionation"
+
+    small_rna_protocol:
+      "Illumina TruSeq Small RNA"
+
+    read_mode:
+      "single"
+
+    candidate_length_compatible:
+      true
+
+    documented_processed_read_min_nt:
+      null
+
+    documented_processed_read_max_nt:
+      null
+
+    candidate_length_within_documented_range:
+      null
+
+    adapter_information_available:
+      false
+
+    documented_adapter_sequence:
+      null
+
+    read_orientation_resolvable:
+      true
+
+    original_pipeline_trf_aware:
+      false
+
+    original_pipeline_trf_or_trna_derived_rna_reported:
+      false
+
+    ffpe:
+      true
+
+    technical_caveats:
+
+      - "Samples are FFPE."
+      - "RNA fragmentation/degradation may alter short-RNA representation."
+      - "Raw sequence is suitable for audit, but biological abundance interpretation requires FFPE caution."
+      - "Processed miRNA counts are not valid tRF substitutes."
+
+    evidence_status:
+      "SOURCE_METADATA_SUFFICIENT_WITH_CAVEATS"
+
+
+  m7_gse290219:
+
+    metadata_source_verified:
+      true
+
+    raw_sequence_public:
+      true
+
+    raw_sequence_repository:
+      "SRA"
+
+    library_strategy:
+      "miRNA high-throughput sequencing"
+
+    library_source:
+      "transcriptomic"
+
+    library_selection:
+      null
+
+    small_rna_protocol:
+      null
+
+    read_mode:
+      null
+
+    candidate_length_compatible:
+      null
+
+    documented_processed_read_min_nt:
+      null
+
+    documented_processed_read_max_nt:
+      null
+
+    candidate_length_within_documented_range:
+      null
+
+    adapter_information_available:
+      false
+
+    documented_adapter_sequence:
+      null
+
+    read_orientation_resolvable:
+      false
+
+    original_pipeline_trf_aware:
+      false
+
+    original_pipeline_trf_or_trna_derived_rna_reported:
+      false
+
+    ffpe:
+      false
+
+    technical_caveats:
+
+      - "Current metadata snapshot confirms public raw sequencing but not sufficient library-detail resolution."
+      - "Read mode, adapter handling, and candidate-length compatibility require further run-level verification."
+      - "Do not proceed to candidate counting until metadata gaps are resolved."
+
+    evidence_status:
+      "TECHNICAL_METADATA_INCOMPLETE"
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  dataset:
+
+    eligible:
+      "TECHNICALLY_ELIGIBLE_FOR_EXACT_SEQUENCE_AUDIT"
+
+    eligible_with_caveats:
+      "TECHNICALLY_ELIGIBLE_WITH_CAVEATS"
+
+    incomplete:
+      "TECHNICAL_ELIGIBILITY_INCOMPLETE_METADATA"
+
+    not_eligible:
+      "NOT_ELIGIBLE_FOR_DIRECT_TRF_QUANTIFICATION"
+
+
+  overall:
+
+    route_available:
+      "EXTERNAL_SMALL_RNA_QUANTIFICATION_ROUTE_AVAILABLE"
+
+    only_incomplete:
+      "EXTERNAL_SMALL_RNA_ROUTE_REQUIRES_METADATA_RESOLUTION"
+
+    no_route:
+      "NO_EXTERNAL_SMALL_RNA_QUANTIFICATION_ROUTE_AVAILABLE"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  metadata_audit_only:
+    true
+
+  fastq_download_performed:
+    false
+
+  raw_read_inspection_performed:
+    false
+
+  candidate_sequence_search_performed:
+    false
+
+  exact_match_counting_performed:
+    false
+
+  approximate_match_counting_performed:
+    false
+
+  sequence_alignment_performed:
+    false
+
+  trf_quantification_performed:
+    false
+
+  candidate_detected_claimed:
+    false
+
+  candidate_absent_claimed:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  parent_trna_inference_performed:
+    false
+
+  differential_expression_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_route_available:
+    "M7.4C_CANDIDATE_TRF_EXTERNAL_QUANTIFICATION"
+
+  if_no_route:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

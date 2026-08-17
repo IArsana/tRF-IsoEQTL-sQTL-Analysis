@@ -950,6 +950,590 @@ datasets:
     provenance:
       raw_files_must_not_be_modified: true
 
+# ===========================================================================
+  # 4. M7 External Small-RNA Validation Datasets
+  # ===========================================================================
+
+  m7_gse80400:
+
+    id: gse80400
+
+    name: GSE80400 Prostate Cancer Small-RNA Sequencing Dataset
+
+    description: >
+      Public human prostate cancer small/non-coding RNA sequencing dataset
+      selected as a candidate external validation resource for direct
+      sequence-level assessment of the prioritized tRF candidate. The study
+      reports tRNA-derived small RNA species and provides a public raw
+      sequencing route through SRA.
+
+    source:
+      organization: NCBI
+      database: GEO
+      accession: GSE80400
+      bioproject: PRJNA318802
+      sra_study: SRP073456
+      data_type: small_rna_sequencing
+      access_type: public
+
+      source_url:
+        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE80400
+
+    organism:
+      species: Homo sapiens
+      taxon_id: 9606
+
+    disease:
+      primary: prostate cancer
+
+    experiment:
+
+      experiment_type:
+        non_coding_rna_profiling_by_high_throughput_sequencing
+
+      library_scope:
+        small_non_coding_rna
+
+      small_rna_library: true
+
+      trna_derived_rna_reported: true
+
+      raw_sequence_available: true
+
+      raw_sequence_repository: SRA
+
+      raw_sequence_access_type: public
+
+      technical_eligibility_verified: false
+
+      candidate_sequence_search_performed: false
+
+      candidate_trf_quantification_performed: false
+
+    cohort:
+
+      sample_count_series: 11
+
+      patient_count_reported: null
+
+      prostate_tissue: true
+
+      tumor_samples_present: true
+
+      normal_or_benign_samples_present: true
+
+      adjacent_normal_samples_present: false
+
+      benign_samples_present: true
+
+      clinical_metadata_reported: true
+
+      biochemical_recurrence_metadata_reported: false
+
+      multiple_disease_stages_reported: false
+
+      ffpe: false
+
+    sequencing:
+
+      platform: GPL9052
+
+      instrument: Illumina Genome Analyzer
+
+      size_fractionated_library_reported: true
+
+      read_length_compatibility_verified: false
+
+      adapter_information_verified: false
+
+      read_structure_verified: false
+
+    intended_use:
+
+      - external_trf_validation
+      - public_small_rna_dataset_discovery
+      - candidate_sequence_quantification_feasibility
+      - prostate_cancer_small_rna_validation
+
+    m7:
+
+      discovery_stage:
+        milestone: M7.4A
+        discovery_eligible: true
+
+      technical_audit_stage:
+        milestone: M7.4B
+        status: pending
+
+      candidate_quantification_stage:
+        milestone: M7.4C
+        status: not_performed
+
+      clinical_association_stage:
+        milestone: M7.4D
+        status: not_performed
+
+    interpretation:
+
+      explicit_trna_derived_rna_context: true
+
+      candidate_trf_detected: false
+
+      candidate_trf_absent: false
+
+      direct_quantification_claimed: false
+
+      clinical_validation_claimed: false
+
+    provenance:
+
+      evidence_status: source_verified
+
+      raw_files_must_not_be_modified: true
+
+      source_metadata_must_be_preserved: true
+
+
+  # ===========================================================================
+  # 5. GSE229904
+  # ===========================================================================
+
+  m7_gse229904:
+
+    id: gse229904
+
+    name: GSE229904 Prostate Cancer Small-RNA Clinical Cohort
+
+    description: >
+      Public prostate cancer sequencing cohort containing small-RNA/miRNA
+      profiles and extensive clinicopathologic information. The cohort is
+      retained as a candidate external validation resource because raw
+      sequencing data are available and biochemical recurrence information
+      is reported.
+
+    source:
+      organization: NCBI
+      database: GEO
+      accession: GSE229904
+      bioproject: null
+      sra_study: null
+      data_type: small_rna_mirna_sequencing
+      access_type: public
+
+      source_url:
+        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE229904
+
+    organism:
+      species: Homo sapiens
+      taxon_id: 9606
+
+    disease:
+      primary: prostate cancer
+
+    experiment:
+
+      experiment_type:
+        non_coding_rna_profiling_by_high_throughput_sequencing
+
+      library_scope:
+        mirna_small_rna
+
+      small_rna_library: true
+
+      trna_derived_rna_reported: false
+
+      raw_sequence_available: true
+
+      raw_sequence_repository: SRA
+
+      raw_sequence_access_type: public
+
+      technical_eligibility_verified: false
+
+      candidate_sequence_search_performed: false
+
+      candidate_trf_quantification_performed: false
+
+    cohort:
+
+      sample_count_series: 271
+
+      patient_count_reported: 197
+
+      prostate_tissue: true
+
+      tumor_samples_present: true
+
+      normal_or_benign_samples_present: true
+
+      adjacent_normal_samples_present: false
+
+      benign_samples_present: true
+
+      clinical_metadata_reported: true
+
+      extensive_clinicopathologic_metadata_reported: true
+
+      biochemical_recurrence_metadata_reported: true
+
+      multiple_disease_stages_reported: false
+
+      ffpe: false
+
+    sequencing:
+
+      platform: GPL18573
+
+      instrument: Illumina NextSeq 500
+
+      size_fractionated_library_reported: true
+
+      read_length_compatibility_verified: false
+
+      adapter_information_verified: false
+
+      read_structure_verified: false
+
+    intended_use:
+
+      - external_trf_validation
+      - public_small_rna_dataset_discovery
+      - clinical_external_validation
+      - biochemical_recurrence_validation
+      - candidate_sequence_quantification_feasibility
+
+    m7:
+
+      discovery_stage:
+        milestone: M7.4A
+        discovery_eligible: true
+
+      technical_audit_stage:
+        milestone: M7.4B
+        status: pending
+
+      candidate_quantification_stage:
+        milestone: M7.4C
+        status: not_performed
+
+      clinical_association_stage:
+        milestone: M7.4D
+        status: not_performed
+
+    interpretation:
+
+      explicit_trna_derived_rna_context: false
+
+      absence_of_explicit_trna_annotation_means_absence: false
+
+      candidate_trf_detected: false
+
+      candidate_trf_absent: false
+
+      direct_quantification_claimed: false
+
+      clinical_validation_claimed: false
+
+    provenance:
+
+      evidence_status: source_verified
+
+      raw_files_must_not_be_modified: true
+
+      source_metadata_must_be_preserved: true
+
+
+  # ===========================================================================
+  # 6. GSE89193
+  # ===========================================================================
+
+  m7_gse89193:
+
+    id: gse89193
+
+    name: GSE89193 Prostate Cancer miRNA-Seq Dataset
+
+    description: >
+      Public prostate cancer non-coding RNA sequencing dataset containing
+      tumor and adjacent-normal prostate specimens. Raw sequencing data are
+      available through SRA. The cohort is retained for external technical
+      validation audit, with FFPE status treated as a potential technical
+      limitation.
+
+    source:
+      organization: NCBI
+      database: GEO
+      accession: GSE89193
+      bioproject: PRJNA350734
+      sra_study: SRP092174
+      data_type: non_coding_rna_sequencing
+      access_type: public
+
+      source_url:
+        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE89193
+
+    organism:
+      species: Homo sapiens
+      taxon_id: 9606
+
+    disease:
+      primary: prostate cancer
+
+    experiment:
+
+      experiment_type:
+        non_coding_rna_profiling_by_high_throughput_sequencing
+
+      library_scope:
+        mirna_small_rna
+
+      small_rna_library: true
+
+      trna_derived_rna_reported: false
+
+      raw_sequence_available: true
+
+      raw_sequence_repository: SRA
+
+      raw_sequence_access_type: public
+
+      technical_eligibility_verified: false
+
+      candidate_sequence_search_performed: false
+
+      candidate_trf_quantification_performed: false
+
+    cohort:
+
+      sample_count_series: 98
+
+      patient_count_reported: null
+
+      prostate_tissue: true
+
+      tumor_samples_present: true
+
+      normal_or_benign_samples_present: true
+
+      adjacent_normal_samples_present: true
+
+      benign_samples_present: false
+
+      clinical_metadata_reported: true
+
+      biochemical_recurrence_metadata_reported: false
+
+      multiple_disease_stages_reported: false
+
+      ffpe: true
+
+    sequencing:
+
+      platform: GPL16791
+
+      instrument: Illumina HiSeq 2500
+
+      size_fractionated_library_reported: false
+
+      read_length_compatibility_verified: false
+
+      adapter_information_verified: false
+
+      read_structure_verified: false
+
+    intended_use:
+
+      - external_trf_validation
+      - tumor_normal_comparison
+      - public_small_rna_dataset_discovery
+      - candidate_sequence_quantification_feasibility
+
+    m7:
+
+      discovery_stage:
+        milestone: M7.4A
+        discovery_eligible: true
+
+      technical_audit_stage:
+        milestone: M7.4B
+        status: pending
+
+      candidate_quantification_stage:
+        milestone: M7.4C
+        status: not_performed
+
+      clinical_association_stage:
+        milestone: M7.4D
+        status: not_performed
+
+    interpretation:
+
+      explicit_trna_derived_rna_context: false
+
+      absence_of_explicit_trna_annotation_means_absence: false
+
+      ffpe_requires_technical_review: true
+
+      candidate_trf_detected: false
+
+      candidate_trf_absent: false
+
+      direct_quantification_claimed: false
+
+      clinical_validation_claimed: false
+
+    provenance:
+
+      evidence_status: source_verified
+
+      raw_files_must_not_be_modified: true
+
+      source_metadata_must_be_preserved: true
+
+
+  # ===========================================================================
+  # 7. GSE290219
+  # ===========================================================================
+
+  m7_gse290219:
+
+    id: gse290219
+
+    name: GSE290219 Prostate Cancer Stage miRNA Dataset
+
+    description: >
+      Public small-RNA/miRNA sequencing dataset containing benign prostate
+      and prostate cancer specimens across reported disease stages. The
+      relatively small cohort is retained as an exploratory external
+      validation resource.
+
+    source:
+      organization: NCBI
+      database: GEO
+      accession: GSE290219
+      bioproject: PRJNA1226508
+      sra_study: null
+      data_type: mirna_small_rna_sequencing
+      access_type: public
+
+      source_url:
+        https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE290219
+
+    organism:
+      species: Homo sapiens
+      taxon_id: 9606
+
+    disease:
+      primary: prostate cancer
+
+    experiment:
+
+      experiment_type:
+        expression_profiling_by_high_throughput_sequencing
+
+      library_scope:
+        mirna_small_rna
+
+      small_rna_library: true
+
+      trna_derived_rna_reported: false
+
+      raw_sequence_available: true
+
+      raw_sequence_repository: SRA
+
+      raw_sequence_access_type: public
+
+      technical_eligibility_verified: false
+
+      candidate_sequence_search_performed: false
+
+      candidate_trf_quantification_performed: false
+
+    cohort:
+
+      sample_count_series: 12
+
+      patient_count_reported: null
+
+      prostate_tissue: true
+
+      tumor_samples_present: true
+
+      normal_or_benign_samples_present: true
+
+      adjacent_normal_samples_present: false
+
+      benign_samples_present: true
+
+      clinical_metadata_reported: true
+
+      biochemical_recurrence_metadata_reported: false
+
+      multiple_disease_stages_reported: true
+
+      ffpe: false
+
+    sequencing:
+
+      platform: GPL20301
+
+      instrument: Illumina HiSeq 4000
+
+      size_fractionated_library_reported: false
+
+      read_length_compatibility_verified: false
+
+      adapter_information_verified: false
+
+      read_structure_verified: false
+
+    intended_use:
+
+      - external_trf_validation
+      - exploratory_stage_comparison
+      - public_small_rna_dataset_discovery
+      - candidate_sequence_quantification_feasibility
+
+    m7:
+
+      discovery_stage:
+        milestone: M7.4A
+        discovery_eligible: true
+
+      technical_audit_stage:
+        milestone: M7.4B
+        status: pending
+
+      candidate_quantification_stage:
+        milestone: M7.4C
+        status: not_performed
+
+      clinical_association_stage:
+        milestone: M7.4D
+        status: not_performed
+
+    interpretation:
+
+      explicit_trna_derived_rna_context: false
+
+      absence_of_explicit_trna_annotation_means_absence: false
+
+      candidate_trf_detected: false
+
+      candidate_trf_absent: false
+
+      direct_quantification_claimed: false
+
+      clinical_validation_claimed: false
+
+    provenance:
+
+      evidence_status: source_verified
+
+      raw_files_must_not_be_modified: true
+
+      source_metadata_must_be_preserved: true
 
 # =============================================================================
 # Cross-Dataset Integration Metadata

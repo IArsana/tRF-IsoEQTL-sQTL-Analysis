@@ -1,0 +1,359 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_trf_sequence_resolution.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.3A
+
+stage: candidate_trf_sequence_resolution
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  validation_readiness:
+
+    relative_path:
+      "data/processed/m7/qc/m7_1_validation_readiness.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.1"
+
+    expected_stage:
+      "tcga_prad_clinical_validation_readiness"
+
+
+  endpoint_resolution:
+
+    relative_path:
+      "data/processed/m7/qc/m7_2b_endpoint_resolution.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.2B"
+
+    expected_stage:
+      "clinical_endpoint_readiness_resolution"
+
+
+# ============================================================================
+# Candidate source
+# ============================================================================
+
+candidate_source:
+
+  upstream_key:
+    "candidate_validation_readiness"
+
+  require_retained_candidate:
+    true
+
+  require_exact_trf_identifier:
+    true
+
+
+# ============================================================================
+# Curated sequence evidence
+#
+# IMPORTANT:
+# - Sequence resolution is source-supported only.
+# - tRF identifiers are never decoded into nucleotide sequence.
+# - Missing sequence means NOT ASSESSABLE, not invalid sequence.
+# ============================================================================
+
+sequence_evidence:
+
+  - trf_id:
+      "tRF-24-S3M8309N0Y"
+
+    exact_identifier_observed:
+      true
+
+    exact_sequence_reported:
+      true
+
+    sequence_dna:
+      "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+    sequence_length:
+      24
+
+    source_type:
+      "PEER_REVIEWED_ARTICLE"
+
+    source_title:
+      "Development of a tRNA-derived small RNA diagnostic and prognostic signature in liver cancer"
+
+    source_locator:
+      "Table 2"
+
+    source_database_context:
+      "MINTbase_ID"
+
+    evidence_status:
+      "EXACT_SEQUENCE_SOURCE_REPORTED"
+
+
+  - trf_id:
+      "tRF-17-WS72092"
+
+    exact_identifier_observed:
+      true
+
+    exact_sequence_reported:
+      false
+
+    sequence_dna:
+      null
+
+    sequence_length:
+      null
+
+    source_type:
+      "PEER_REVIEWED_ARTICLE"
+
+    source_title:
+      "Dysregulation of microRNAs and tRNA-derived ncRNAs in mesothelial and mesothelioma cell lines after asbestiform fiber exposure"
+
+    source_locator:
+      "Table 3"
+
+    source_database_context:
+      "MINTmap_or_tRF_identifier"
+
+    evidence_status:
+      "IDENTIFIER_CONFIRMED_SEQUENCE_NOT_AVAILABLE"
+
+
+  - trf_id:
+      "tRF-30-7EMQ18Y3E7QN"
+
+    exact_identifier_observed:
+      true
+
+    exact_sequence_reported:
+      false
+
+    sequence_dna:
+      null
+
+    sequence_length:
+      null
+
+    source_type:
+      "PEER_REVIEWED_ARTICLE"
+
+    source_title:
+      "tRF-29-86J8WPMN1EJ3: a tRNA-derived small RNA promoting esophageal cancer progression"
+
+    source_locator:
+      "Differential tsRNA candidate panel containing tRF-30-7EMQ18Y3E7QN"
+
+    source_database_context:
+      "MINTbase_style_identifier"
+
+    evidence_status:
+      "IDENTIFIER_CONFIRMED_SEQUENCE_NOT_AVAILABLE"
+
+
+# ============================================================================
+# Sequence validation
+# ============================================================================
+
+sequence_validation:
+
+  alphabet:
+    - "A"
+    - "C"
+    - "G"
+    - "T"
+
+  allow_rna_u:
+    true
+
+  normalize_rna_u_to_dna_t:
+    true
+
+  require_identifier_length_match:
+    true
+
+  length_prefix_pattern:
+    "^tRF-([0-9]+)-"
+
+  allow_sequence_length_mismatch:
+    false
+
+  require_nonempty_sequence:
+    true
+
+  missing_sequence_validation_state:
+    "NOT_ASSESSABLE"
+
+
+# ============================================================================
+# Resolution policy
+# ============================================================================
+
+resolution_policy:
+
+  require_exact_source_reported_sequence:
+    true
+
+  allow_identifier_decoding:
+    false
+
+  allow_sequence_inference:
+    false
+
+  allow_parent_trna_inference:
+    false
+
+  allow_trf_class_inference:
+    false
+
+  allow_sequence_from_similar_identifier:
+    false
+
+  allow_prefix_or_suffix_sequence_matching:
+    false
+
+  allow_nearest_trf_substitution:
+    false
+
+  allow_sequence_from_parent_trna_without_exact_source_mapping:
+    false
+
+  unresolved_sequence_interpreted_as_absent:
+    false
+
+
+# ============================================================================
+# Quantification readiness
+# ============================================================================
+
+quantification_policy:
+
+  require_exact_sequence:
+    true
+
+  require_valid_sequence_alphabet:
+    true
+
+  require_length_consistency:
+    true
+
+  require_source_supported_sequence:
+    true
+
+  candidate_specific_progression_allowed:
+    true
+
+
+# ============================================================================
+# Status codes
+# ============================================================================
+
+statuses:
+
+  resolved:
+    "TRF_SEQUENCE_RESOLVED_SOURCE_SUPPORTED"
+
+  unresolved_identifier_confirmed:
+    "TRF_SEQUENCE_UNRESOLVED_IDENTIFIER_CONFIRMED"
+
+  unresolved_identifier_unconfirmed:
+    "TRF_SEQUENCE_UNRESOLVED_IDENTIFIER_NOT_CONFIRMED"
+
+  invalid_sequence:
+    "TRF_SEQUENCE_SOURCE_REPORTED_BUT_VALIDATION_FAILED"
+
+  overall_complete:
+    "ALL_CANDIDATE_TRF_SEQUENCES_RESOLVED"
+
+  overall_partial:
+    "PARTIAL_CANDIDATE_TRF_SEQUENCE_RESOLUTION"
+
+  overall_none:
+    "NO_CANDIDATE_TRF_SEQUENCE_RESOLVED"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  trf_identifier_decoded:
+    false
+
+  sequence_inferred:
+    false
+
+  parent_trna_inferred:
+    false
+
+  trf_class_inferred:
+    false
+
+  similar_trf_substituted:
+    false
+
+  nearest_trf_substituted:
+    false
+
+  unresolved_sequence_interpreted_as_invalid:
+    false
+
+  unresolved_sequence_interpreted_as_absent:
+    false
+
+  sequence_alignment_performed:
+    false
+
+  tcga_quantification_performed:
+    false
+
+  expression_analysis_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_any_sequence_resolved:
+    "M7.3B_TRF_QUANTIFICATION_FEASIBILITY"
+
+  if_none_resolved:
+    "M7_TRF_VALIDATION_BLOCKED_SEQUENCE_RESOLUTION"
+
+  unresolved_candidates:
+    "RETAIN_AS_UNRESOLVED_SEQUENCE_DATA_LIMITATION"

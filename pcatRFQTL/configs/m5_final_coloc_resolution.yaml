@@ -1,0 +1,191 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m5_final_coloc_resolution.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M5.6D
+
+stage: final_colocalization_resolution
+
+
+# ============================================================================
+# Candidate loci
+# ============================================================================
+
+candidate_leads:
+  - rs10216902
+  - rs1288100
+  - rs2328376
+
+
+# ============================================================================
+# Locked upstream evidence
+# ============================================================================
+
+upstream_qc:
+
+  m5_5:
+    label: coloc_readiness_assessment
+    relative_path: "data/processed/m5/qc/m5_5_coloc_readiness.json"
+    required: true
+
+  m5_6a:
+    label: moradi_public_data_gap_resolution
+    relative_path: "data/processed/m5/qc/m5_6_coloc_data_gap.json"
+    required: true
+
+  m5_6b:
+    label: moradi_reconstruction_feasibility
+    relative_path: "data/processed/m5/qc/m5_6b_coloc_reconstruction.json"
+    required: true
+
+  m5_6c_1:
+    label: cancersplicingqtl_download_inspection
+    relative_path: "data/processed/m5/qc/m5_6c_1_cancersplicingqtl_inspection.json"
+    required: true
+
+
+# ============================================================================
+# Expected locked states
+# ============================================================================
+
+expected_states:
+
+  m5_5:
+    formal_coloc_ready_pairs: 0
+    formal_coloc_blocked_pairs: 12
+    qtl_full_locus_summary_units: 0
+    qtl_dense_locus_units: 0
+
+  m5_6a:
+    moradi_resolution_state:
+      - MORADI_FULL_QTL_NOT_IDENTIFIED_PUBLICLY
+
+    formal_coloc_ready_candidates: 0
+
+  m5_6b:
+    reconstruction_readiness:
+      - THEORETICALLY_POSSIBLE_BUT_NOT_REPRODUCIBLE
+
+    reconstruction_can_proceed: false
+    formal_coloc_ready_candidates: 0
+
+  m5_6c_1:
+    classification:
+      - SIGNIFICANT_ONLY_NOT_COLOC_READY
+
+    formal_coloc_ready: false
+    coloc_abf_ready: false
+    coloc_susie_ready: false
+
+
+# ============================================================================
+# Final resolution policy
+# ============================================================================
+
+resolution_policy:
+
+  final_status_if_no_valid_qtl_input:
+    FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION
+
+  final_status_if_valid_qtl_input_available:
+    FORMAL_COLOC_INPUT_RESOLVED_REASSESSMENT_REQUIRED
+
+  require_all_upstream_qc:
+    true
+
+  require_locked_states_match:
+    true
+
+  formal_coloc_requires_valid_dense_qtl_source:
+    true
+
+  alternative_significant_only_resource_can_resolve_gap:
+    false
+
+  approximate_reconstruction_can_replace_original_qtl:
+    false
+
+  absent_candidate_in_significant_only_resource_is_null:
+    false
+
+  cross_build_coordinate_join_allowed:
+    false
+
+  canonical_rsid_cross_build_matching_allowed:
+    true
+
+
+# ============================================================================
+# Evidence-preservation policy
+# ============================================================================
+
+evidence_preservation:
+
+  retain:
+    - regional_gwas_association
+    - cross_study_disease_signal
+    - candidate_centered_ld_analysis
+    - disease_proxy_regulatory_proxy_pairwise_ld
+    - moradi_regulatory_qtl_evidence
+    - cancersplicingqtl_descriptive_evidence
+    - cross_population_ld_sensitivity
+
+  prohibit_claims:
+    - colocalized_signal
+    - shared_causal_variant
+    - causal_regulatory_mechanism
+    - fine_mapped_causal_variant
+    - posterior_probability_h4
+    - independent_replication_from_related_gwas_analyses
+
+  manuscript_language:
+    preferred:
+      - locus_level_convergence
+      - regulatory_support
+      - regional_disease_association
+      - convergent_but_non_colocalized_evidence
+      - formal_colocalization_not_performed_due_to_qtl_data_limitations
+
+    avoid:
+      - causal
+      - colocalized
+      - shared_causal_variant
+      - mechanistically_proven
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  formal_colocalization_performed: false
+
+  coloc_abf_performed: false
+
+  coloc_susie_performed: false
+
+  fine_mapping_performed: false
+
+  causal_inference_performed: false
+
+  posterior_coloc_probabilities_reported: false
+
+  missing_qtl_statistics_imputed: false
+
+  significant_only_qtl_treated_as_dense: false
+
+  approximate_reconstruction_treated_as_exact: false

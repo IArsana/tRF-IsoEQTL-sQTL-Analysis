@@ -1,0 +1,291 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_candidate_fragment_interpretation.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone:
+  "M7.4C.2C"
+
+stage:
+  "candidate_fragment_interpretation"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  positional_flanking_audit:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4c2b_external_trf_positional_flanking_audit.json"
+
+    expected_milestone:
+      "M7.4C.2B"
+
+    expected_stage:
+      "external_trf_positional_flanking_audit"
+
+    expected_overall_status:
+      "EXTERNAL_TRF_POSITIONAL_CONTEXT_AUDIT_COMPLETE"
+
+    expected_interpretation_status:
+      "EXACT_CANDIDATE_SEQUENCE_WITH_BOUNDARY_COMPATIBLE_READS"
+
+
+# ============================================================================
+# Upstream processed artifacts
+# ============================================================================
+
+inputs:
+
+  run_summary:
+    "data/processed/m7/external_trf_positional_flanking_audit/gse80400_positional_flanking_run_summary.parquet"
+
+  motif_context:
+    "data/processed/m7/external_trf_positional_flanking_audit/gse80400_exact_motif_context.parquet"
+
+  motif_context_aggregate:
+    "data/processed/m7/external_trf_positional_flanking_audit/gse80400_exact_motif_context_aggregate.parquet"
+
+
+# ============================================================================
+# Candidate
+# ============================================================================
+
+candidate:
+
+  lead_rsid:
+    "rs10216902"
+
+  trf_id:
+    "tRF-24-S3M8309N0Y"
+
+  exact_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  sequence_length_nt:
+    24
+
+
+# ============================================================================
+# Dataset
+# ============================================================================
+
+dataset:
+
+  dataset_key:
+    "m7_gse80400"
+
+  geo_accession:
+    "GSE80400"
+
+  sra_study:
+    "SRP073456"
+
+
+# ============================================================================
+# Interpretation thresholds
+#
+# These thresholds do not establish biological identity.
+# They only formalize sequence-context interpretation.
+# ============================================================================
+
+interpretation_rules:
+
+  minimum_total_positive_reads:
+    1
+
+  minimum_runs_with_positive_reads:
+    1
+
+  direct_fragment:
+
+    require_full_length_reads:
+      true
+
+    minimum_full_length_fraction:
+      0.50
+
+  five_prime_boundary:
+
+    minimum_boundary_fraction:
+      0.90
+
+  three_prime_boundary:
+
+    minimum_boundary_fraction:
+      0.90
+
+  internal_motif:
+
+    minimum_internal_fraction:
+      0.50
+
+  recurrence:
+
+    minimum_runs:
+      2
+
+
+# ============================================================================
+# Flanking architecture
+# ============================================================================
+
+flank_analysis:
+
+  dominant_context_top_n:
+    20
+
+  calculate_context_fraction:
+    true
+
+  calculate_context_run_recurrence:
+    true
+
+  calculate_flank_diversity:
+    true
+
+  calculate_dominant_context_fraction:
+    true
+
+  calculate_top_context_fraction:
+    true
+
+  classify_recurrent_flanks:
+    true
+
+  recurrent_flank_min_runs:
+    2
+
+  recurrent_flank_min_occurrences:
+    2
+
+
+# ============================================================================
+# Evidence classes
+# ============================================================================
+
+evidence_classes:
+
+  direct_fragment:
+    "DIRECT_24NT_TRF_FRAGMENT_SUPPORT"
+
+  five_prime_longer_context:
+    "CANDIDATE_5PRIME_SEQUENCE_WITH_LONGER_FRAGMENT_CONTEXT"
+
+  three_prime_longer_context:
+    "CANDIDATE_3PRIME_SEQUENCE_WITH_LONGER_FRAGMENT_CONTEXT"
+
+  mixed_boundary:
+    "BOUNDARY_COMPATIBLE_CANDIDATE_FRAGMENT_SUPPORT"
+
+  internal_motif:
+    "EXACT_SEQUENCE_MOTIF_SUPPORT_ONLY"
+
+  insufficient:
+    "INSUFFICIENT_SEQUENCE_CONTEXT_FOR_FRAGMENT_INTERPRETATION"
+
+
+# ============================================================================
+# Interpretation safeguards
+# ============================================================================
+
+scientific_policy:
+
+  upstream_exact_sequence_evidence_retained:
+    true
+
+  reinterpret_as_direct_24nt_without_full_length_support:
+    false
+
+  parent_trna_inference_performed:
+    false
+
+  trf_class_inference_performed:
+    false
+
+  amino_acid_inference_performed:
+    false
+
+  anticodon_inference_performed:
+    false
+
+  genomic_origin_inference_performed:
+    false
+
+  adapter_origin_assumed:
+    false
+
+  flank_biological_origin_assumed:
+    false
+
+  clinical_association_performed:
+    false
+
+  differential_expression_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/candidate_fragment_interpretation"
+
+  flank_architecture_filename:
+    "gse80400_candidate_flank_architecture.parquet"
+
+  interpretation_filename:
+    "gse80400_candidate_fragment_interpretation.parquet"
+
+  summary_filename:
+    "candidate_fragment_interpretation_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_4c2c_candidate_fragment_interpretation.json"
+
+
+# ============================================================================
+# Status
+# ============================================================================
+
+statuses:
+
+  complete:
+    "CANDIDATE_FRAGMENT_INTERPRETATION_COMPLETE"
+
+  insufficient:
+    "CANDIDATE_FRAGMENT_INTERPRETATION_INSUFFICIENT"
+
+
+# ============================================================================
+# Next
+# ============================================================================
+
+next_stage:
+
+  if_complete:
+    "M7.4D_EXTERNAL_CLINICAL_ASSOCIATION_READINESS"
+
+  if_insufficient:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

@@ -1,0 +1,541 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_study_independence_harmonization.yaml
+#
+# Description:
+#   Configuration for M7.5C Study Independence & Harmonization Audit.
+#
+#   This stage evaluates:
+#     1. Publication-family relationships.
+#     2. Explicit cohort-label overlap.
+#     3. Phenotype and ancestry metadata.
+#     4. Allele/effect-direction harmonization.
+#     5. Directional aggregation within publication families.
+#     6. Candidate-level within- and cross-publication heterogeneity.
+#
+#   Scientific constraints:
+#     - different GWAS Catalog accessions do not establish independence;
+#     - different PubMed IDs do not prove sample independence;
+#     - same PubMed ID is treated as a related publication family;
+#     - cohort-label overlap indicates potential sample overlap;
+#     - lack of cohort-label overlap does not prove independence;
+#     - only harmonised sources are used for cross-study direction analysis;
+#     - strand complements are not inferred;
+#     - palindromic alleles are not resolved externally;
+#     - no meta-analysis or pooled effect is performed;
+#     - p-values are not used to select a preferred effect direction.
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+
+milestone:
+  "M7.5C"
+
+stage:
+  "study_independence_and_harmonization_audit"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  m7_5b:
+
+    relative_path:
+      "data/processed/m7/qc/m7_5b_full_summary_statistics_audit.json"
+
+    expected_milestone:
+      "M7.5B"
+
+    expected_stage:
+      "full_summary_statistics_audit"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "FULL_SUMMARY_STATISTICS_EXACT_VARIANT_EVIDENCE_AVAILABLE_INDEPENDENCE_UNRESOLVED"
+
+    required_summary_state:
+
+      candidate_variants_assessed:
+        3
+
+      eligible_full_sumstats_studies:
+        13
+
+      summary_statistics_files_selected:
+        13
+
+      summary_statistics_files_scanned_successfully:
+        13
+
+      exact_variant_rows_found:
+        18
+
+      full_summary_statistics_audit_complete:
+        true
+
+      independent_replications_verified:
+        0
+
+      independent_replication_claimed:
+        false
+
+
+# ============================================================================
+# Inputs
+# ============================================================================
+
+inputs:
+
+  study_inventory:
+    "data/processed/m7/full_summary_statistics_audit/prostate_gwas_study_inventory.parquet"
+
+  file_manifest:
+    "data/processed/m7/full_summary_statistics_audit/full_summary_statistics_file_manifest.parquet"
+
+  exact_variant_hits:
+    "data/processed/m7/full_summary_statistics_audit/exact_variant_full_sumstats_hits.parquet"
+
+  candidate_resolution:
+    "data/processed/m7/full_summary_statistics_audit/candidate_full_sumstats_resolution.parquet"
+
+
+# ============================================================================
+# Candidate set
+# ============================================================================
+
+candidates:
+
+  - rsid:
+      "rs10216902"
+
+    priority_rank:
+      1
+
+    priority_class:
+      "HIGH_PRIORITY"
+
+
+  - rsid:
+      "rs2328376"
+
+    priority_rank:
+      2
+
+    priority_class:
+      "INTERMEDIATE_PRIORITY"
+
+
+  - rsid:
+      "rs1288100"
+
+    priority_rank:
+      3
+
+    priority_class:
+      "LOWER_PRIORITY"
+
+
+# ============================================================================
+# Study-independence policy
+# ============================================================================
+
+independence_policy:
+
+  same_accession_is_independent:
+    false
+
+  different_accession_is_independent:
+    false
+
+  same_pubmed_is_related_analysis_family:
+    true
+
+  different_pubmed_proves_independence:
+    false
+
+  overlapping_cohort_labels_indicate:
+    "POTENTIAL_SAMPLE_OVERLAP"
+
+  no_cohort_overlap_proves_independence:
+    false
+
+  unknown_cohort_proves_independence:
+    false
+
+  different_ancestry_proves_independence:
+    false
+
+  require_manual_sample_overlap_review_for_independence:
+    true
+
+  independent_replication_claim_allowed:
+    false
+
+
+# ============================================================================
+# Cohort metadata
+# ============================================================================
+
+cohort_policy:
+
+  ignored_unknown_values:
+
+    - ""
+    - "NA"
+    - "N/A"
+    - "NR"
+    - "NONE"
+    - "UNKNOWN"
+
+  compare_case_insensitive:
+    true
+
+  trim_whitespace:
+    true
+
+
+# ============================================================================
+# Phenotype harmonization
+#
+# These categories describe phenotype compatibility only.
+# They do not prove study independence.
+# ============================================================================
+
+phenotype_policy:
+
+  reference_family:
+    "PROSTATE_CANCER"
+
+  exact_general_traits:
+
+    - "Prostate cancer"
+    - "ICD10 C61: Malignant neoplasm of prostate"
+    - "Primary malignancy prostate"
+
+  compatible_subgroup_traits:
+
+    - "High-risk prostate cancer"
+
+  accepted_prefixes:
+
+    - "Prostate cancer (UKB data field 20001)"
+
+  statuses:
+
+    general:
+      "GENERAL_PROSTATE_CANCER_COMPATIBLE"
+
+    subgroup:
+      "PROSTATE_CANCER_SUBGROUP_COMPATIBLE_NONIDENTICAL"
+
+    unresolved:
+      "PHENOTYPE_COMPATIBILITY_UNRESOLVED"
+
+    incompatible:
+      "PHENOTYPE_NOT_COMPATIBLE"
+
+
+# ============================================================================
+# Ancestry policy
+# ============================================================================
+
+ancestry_policy:
+
+  preserve_source_labels:
+    true
+
+  infer_ancestry_from_geography:
+    false
+
+  infer_ancestry_from_cohort:
+    false
+
+  different_ancestry_proves_independence:
+    false
+
+
+# ============================================================================
+# Allele/effect harmonization
+# ============================================================================
+
+effect_harmonization:
+
+  harmonised_sources_only_for_directional_comparison:
+    true
+
+  allow_nonharmonised_directional_confirmation:
+    false
+
+  exact_allele_pair_required:
+    true
+
+  allow_strand_complement:
+    false
+
+  allow_palindromic_resolution:
+    false
+
+  allow_external_reference_allele_lookup:
+    false
+
+  canonical_reference_policy:
+    "FIRST_SORTED_HARMONISED_VALID_HIT"
+
+  supported_effect_types:
+
+    - "BETA"
+    - "ODDS_RATIO"
+
+  beta_direction:
+    "SIGN"
+
+  odds_ratio_direction:
+    "LOG_OR"
+
+  p_value_is_effect_direction:
+    false
+
+  p_value_used_to_select_preferred_direction:
+    false
+
+  missing_effect_size_is_directionally_usable:
+    false
+
+  statuses:
+
+    usable:
+      "EFFECT_DIRECTION_HARMONIZED"
+
+    missing_alleles:
+      "ALLELE_HARMONIZATION_BLOCKED_MISSING_ALLELES"
+
+    allele_pair_mismatch:
+      "ALLELE_PAIR_MISMATCH"
+
+    nonharmonised_source:
+      "EFFECT_DIRECTION_DEFERRED_NONHARMONISED_SOURCE"
+
+    missing_effect:
+      "EFFECT_DIRECTION_UNAVAILABLE_MISSING_EFFECT_SIZE"
+
+    unresolved:
+      "EFFECT_HARMONIZATION_UNRESOLVED"
+
+
+# ============================================================================
+# Publication-family direction
+#
+# Multiple accessions belonging to the same PubMed ID are aggregated before
+# candidate-level directional interpretation.
+# ============================================================================
+
+publication_family_direction:
+
+  publication_family_unit:
+    "PUBMED_ID"
+
+  minimum_usable_rows:
+    1
+
+  mixed_direction_requires:
+    2
+
+  p_value_used_for_family_direction:
+    false
+
+  effect_magnitude_used_for_family_direction:
+    false
+
+  statuses:
+
+    positive:
+      "PUBLICATION_FAMILY_DIRECTION_POSITIVE"
+
+    negative:
+      "PUBLICATION_FAMILY_DIRECTION_NEGATIVE"
+
+    mixed:
+      "PUBLICATION_FAMILY_DIRECTION_MIXED"
+
+    unavailable:
+      "PUBLICATION_FAMILY_DIRECTION_UNAVAILABLE"
+
+
+# ============================================================================
+# Candidate-level directional resolution
+# ============================================================================
+
+candidate_direction:
+
+  statuses:
+
+    cross_publication_heterogeneity:
+      "CROSS_PUBLICATION_DIRECTIONAL_HETEROGENEITY_INDEPENDENCE_UNRESOLVED"
+
+    within_publication_heterogeneity:
+      "WITHIN_PUBLICATION_DIRECTIONAL_HETEROGENEITY_INDEPENDENCE_UNRESOLVED"
+
+    within_and_cross_publication_heterogeneity:
+      "WITHIN_AND_CROSS_PUBLICATION_DIRECTIONAL_HETEROGENEITY_INDEPENDENCE_UNRESOLVED"
+
+    multi_publication_concordant:
+      "MULTI_PUBLICATION_DIRECTIONALLY_CONCORDANT_INDEPENDENCE_UNRESOLVED"
+
+    single_publication_family:
+      "EXACT_VARIANT_EVIDENCE_LIMITED_TO_SINGLE_PUBLICATION_FAMILY"
+
+    direction_unresolved:
+      "MULTI_PUBLICATION_DIRECTION_UNRESOLVED"
+
+
+# ============================================================================
+# Overall status
+# ============================================================================
+
+overall_statuses:
+
+  heterogeneous:
+    "MULTI_STUDY_VARIANT_EVIDENCE_DIRECTIONALLY_HETEROGENEOUS_INDEPENDENCE_UNRESOLVED"
+
+  concordant:
+    "MULTI_STUDY_VARIANT_EVIDENCE_DIRECTIONALLY_CONCORDANT_INDEPENDENCE_UNRESOLVED"
+
+  direction_unresolved:
+    "MULTI_STUDY_VARIANT_EVIDENCE_DIRECTION_UNRESOLVED"
+
+  incomplete:
+    "STUDY_INDEPENDENCE_AND_HARMONIZATION_AUDIT_INCOMPLETE"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  independent_replication_claimed:
+    false
+
+  independent_replications_verified:
+    0
+
+  study_independence_verified:
+    false
+
+  different_accession_used_as_independence:
+    false
+
+  different_pubmed_used_as_proof_of_independence:
+    false
+
+  ancestry_difference_used_as_independence:
+    false
+
+  cohort_nonoverlap_used_as_proof_of_independence:
+    false
+
+  strand_complement_inferred:
+    false
+
+  palindromic_alleles_resolved:
+    false
+
+  external_reference_alleles_used:
+    false
+
+  nonharmonised_sources_used_for_directional_confirmation:
+    false
+
+  p_value_used_to_select_direction:
+    false
+
+  statistical_significance_reclassified:
+    false
+
+  meta_analysis_performed:
+    false
+
+  pooled_effect_estimated:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Validation
+# ============================================================================
+
+validation:
+
+  expected_candidate_count:
+    3
+
+  expected_exact_hit_rows:
+    18
+
+  expected_rsids:
+
+    - "rs10216902"
+    - "rs2328376"
+    - "rs1288100"
+
+  require_independent_replication_false:
+    true
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/study_independence_harmonization"
+
+  publication_family_inventory_filename:
+    "publication_family_inventory.parquet"
+
+  study_pair_overlap_filename:
+    "study_pair_overlap_audit.parquet"
+
+  candidate_study_harmonization_filename:
+    "candidate_study_harmonization.parquet"
+
+  candidate_effect_harmonization_filename:
+    "candidate_effect_harmonization.parquet"
+
+  publication_family_direction_filename:
+    "publication_family_direction.parquet"
+
+  candidate_direction_resolution_filename:
+    "candidate_direction_resolution.parquet"
+
+  candidate_resolution_filename:
+    "candidate_independence_harmonization_resolution.parquet"
+
+  summary_filename:
+    "study_independence_harmonization_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_5c_study_independence_harmonization.json"
+
+
+next_stage:
+  "M7.6_INTEGRATED_EVIDENCE_RESOLUTION"

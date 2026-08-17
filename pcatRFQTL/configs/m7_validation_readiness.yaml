@@ -1,0 +1,437 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_validation_readiness.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.1
+
+stage: tcga_prad_clinical_validation_readiness
+
+
+# ============================================================================
+# Target cohort
+# ============================================================================
+
+target_cohort:
+
+  project_id:
+    "TCGA-PRAD"
+
+  disease:
+    "Prostate Adenocarcinoma"
+
+  disease_code:
+    "PRAD"
+
+  repository:
+    "NCI_GDC"
+
+
+# ============================================================================
+# Locked upstream QC
+# ============================================================================
+
+upstream_qc:
+
+  pathway_readiness:
+
+    relative_path:
+      "data/processed/m6/qc/m6_4b_pathway_readiness.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M6.4B"
+
+    expected_stage:
+      "pathway_readiness_assessment"
+
+    expected_pathway_status:
+      "PATHWAY_ENRICHMENT_BLOCKED_NO_RESOLVED_GENES"
+
+
+# ============================================================================
+# Candidate source
+#
+# Candidate identities are inherited from M6.4B / M6.4A.
+# They are NOT manually recreated here.
+# ============================================================================
+
+candidate_source:
+
+  field:
+    "candidate_pathway_readiness"
+
+  require_retained_candidate:
+    true
+
+  require_trf_identity:
+    true
+
+
+# ============================================================================
+# GDC capability reference
+#
+# These describe the validation routes to audit.
+#
+# They do NOT mean that corresponding local data have already been
+# downloaded.
+# ============================================================================
+
+gdc_capabilities:
+
+  clinical_metadata:
+
+    domain:
+      "CLINICAL"
+
+    public_resource_available:
+      true
+
+    controlled_access_required:
+      false
+
+    direct_candidate_measurement:
+      false
+
+    capability_status:
+      "PUBLIC_RESOURCE_ROUTE_AVAILABLE"
+
+    interpretation:
+      "GDC clinical metadata can support cohort and endpoint construction."
+
+    next_action:
+      "QUERY_GDC_CLINICAL_METADATA"
+
+
+  processed_mirna_expression:
+
+    domain:
+      "SMALL_RNA_PROCESSED"
+
+    public_resource_available:
+      true
+
+    controlled_access_required:
+      false
+
+    direct_candidate_measurement:
+      false
+
+    capability_status:
+      "PROCESSED_MIRNA_NOT_DIRECT_TRF_QUANTIFICATION"
+
+    interpretation:
+      "Processed GDC miRNA quantification must not be treated as direct candidate tRF quantification."
+
+    next_action:
+      "DO_NOT_USE_PROCESSED_MIRNA_AS_DIRECT_TRF_MEASUREMENT"
+
+
+  raw_or_aligned_small_rna:
+
+    domain:
+      "SMALL_RNA_RAW_OR_ALIGNED"
+
+    public_resource_available:
+      false
+
+    controlled_access_required:
+      true
+
+    direct_candidate_measurement:
+      false
+
+    capability_status:
+      "CONTROLLED_SEQUENCE_ROUTE_REQUIRES_TRF_SEQUENCE_RESOLUTION"
+
+    interpretation:
+      "Candidate-specific tRF quantification requires a reproducible tRF sequence definition before raw/aligned read counting."
+
+    next_action:
+      "RESOLVE_TRF_SEQUENCE_BEFORE_RAW_READ_QUANTIFICATION"
+
+
+  germline_variant_data:
+
+    domain:
+      "GERMLINE_VARIANT"
+
+    public_resource_available:
+      false
+
+    controlled_access_required:
+      true
+
+    direct_candidate_measurement:
+      true
+
+    capability_status:
+      "CONTROLLED_ACCESS_GERMLINE_ROUTE"
+
+    interpretation:
+      "Individual-level germline candidate-variant validation requires an appropriate controlled-access genotype resource."
+
+    next_action:
+      "ASSESS_CONTROLLED_ACCESS_FEASIBILITY"
+
+
+  regulatory_event:
+
+    domain:
+      "REGULATORY_EVENT"
+
+    public_resource_available:
+      false
+
+    controlled_access_required:
+      false
+
+    direct_candidate_measurement:
+      false
+
+    capability_status:
+      "SOURCE_EVENT_NAMESPACE_REQUIRED"
+
+    interpretation:
+      "INT98200 cannot be transferred directly into TCGA validation without a reproducible source event definition."
+
+    next_action:
+      "KEEP_AS_CONTEXT_ONLY_UNLESS_EVENT_MAPPING_RESOLVED"
+
+
+# ============================================================================
+# tRF readiness policy
+# ============================================================================
+
+trf_validation_policy:
+
+  require_exact_trf_identity:
+    true
+
+  require_exact_sequence_for_read_quantification:
+    true
+
+  processed_mirna_counts_accepted_as_trf_counts:
+    false
+
+  infer_sequence_from_trf_identifier:
+    false
+
+  infer_parent_trna_from_identifier:
+    false
+
+  infer_trf_class_from_identifier:
+    false
+
+  substitute_nearest_mirna:
+    false
+
+  substitute_similar_small_rna:
+    false
+
+
+# ============================================================================
+# Variant validation policy
+# ============================================================================
+
+variant_validation_policy:
+
+  require_exact_rsid:
+    true
+
+  require_individual_level_genotype:
+    true
+
+  allow_somatic_variant_as_germline_substitute:
+    false
+
+  allow_nearest_variant_substitute:
+    false
+
+  allow_regional_variant_substitute:
+    false
+
+  allow_ld_proxy_without_explicit_analysis:
+    false
+
+  controlled_access_route_allowed:
+    true
+
+
+# ============================================================================
+# Regulatory event policy
+# ============================================================================
+
+regulatory_event_policy:
+
+  target_feature:
+    "INT98200"
+
+  require_exact_event_definition:
+    true
+
+  numeric_suffix_as_coordinate:
+    false
+
+  numeric_suffix_as_row_index:
+    false
+
+  nearest_intron_mapping:
+    false
+
+  transfer_event_id_across_annotation_systems:
+    false
+
+  unresolved_event_interpreted_as_absent:
+    false
+
+
+# ============================================================================
+# Readiness statuses
+# ============================================================================
+
+statuses:
+
+  clinical:
+    ready_for_acquisition:
+      "CLINICAL_METADATA_ACQUISITION_READY"
+
+    unavailable:
+      "CLINICAL_METADATA_ROUTE_UNAVAILABLE"
+
+
+  trf:
+
+    identity_available_sequence_unresolved:
+      "TRF_IDENTITY_AVAILABLE_SEQUENCE_RESOLUTION_REQUIRED"
+
+    sequence_ready:
+      "TRF_SEQUENCE_READY_FOR_QUANTIFICATION_AUDIT"
+
+    identity_missing:
+      "TRF_IDENTITY_UNAVAILABLE"
+
+    processed_only_not_direct:
+      "PROCESSED_MIRNA_NOT_DIRECT_TRF_VALIDATION"
+
+
+  variant:
+
+    controlled_access_required:
+      "VARIANT_VALIDATION_CONTROLLED_ACCESS_REQUIRED"
+
+    direct_route_ready:
+      "VARIANT_VALIDATION_DIRECT_ROUTE_READY"
+
+    unavailable:
+      "VARIANT_VALIDATION_RESOURCE_UNAVAILABLE"
+
+
+  regulatory_event:
+
+    not_reproducible:
+      "REGULATORY_EVENT_DIRECT_VALIDATION_NOT_REPRODUCIBLE"
+
+    ready:
+      "REGULATORY_EVENT_DIRECT_VALIDATION_READY"
+
+
+# ============================================================================
+# Overall route
+# ============================================================================
+
+overall_route:
+
+  clinical_cohort_allowed:
+    true
+
+  direct_trf_clinical_association_allowed:
+    false
+
+  direct_variant_validation_allowed:
+    false
+
+  direct_regulatory_event_validation_allowed:
+    false
+
+  pathway_enrichment_required_before_m7:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  clinical_association_performed:
+    false
+
+  survival_analysis_performed:
+    false
+
+  trf_quantification_performed:
+    false
+
+  genotype_analysis_performed:
+    false
+
+  regulatory_event_quantification_performed:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  mirna_used_as_trf_substitute:
+    false
+
+  somatic_variant_used_as_germline_substitute:
+    false
+
+  nearest_variant_substitution_performed:
+    false
+
+  trf_sequence_inferred:
+    false
+
+  int98200_reconstructed:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stages
+# ============================================================================
+
+next_stage:
+
+  clinical:
+    "M7.2_CLINICAL_COHORT_CONSTRUCTION"
+
+  trf:
+    "M7.3A_CANDIDATE_TRF_SEQUENCE_RESOLUTION"
+
+  variant:
+    "M7.5_VARIANT_VALIDATION_ACCESS_AUDIT"
+
+  regulatory_event:
+    "RETAIN_M6_REGULATORY_CONTEXT_ONLY"

@@ -1,0 +1,277 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_controlled_access_readiness.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.3C
+
+stage: controlled_access_quantification_readiness
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  quantification_feasibility:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3b_trf_quantification_feasibility.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.3B"
+
+    expected_stage:
+      "trf_quantification_feasibility"
+
+    expected_overall_status:
+      "TRF_QUANTIFICATION_FEASIBLE_VIA_CONTROLLED_ACCESS"
+
+
+# ============================================================================
+# Controlled-access authentication
+#
+# SECURITY:
+# Never place the actual GDC token in this YAML.
+#
+# The environment variable should contain a FILE PATH to the token,
+# not the token text itself.
+# ============================================================================
+
+authentication:
+
+  provider:
+    "NCI_GDC"
+
+  authorization_model:
+    "DBGAP_PROJECT_AUTHORIZATION"
+
+  authentication_model:
+    "ERA_COMMONS_GDC_TOKEN"
+
+  token_path_environment_variable:
+    "GDC_TOKEN_FILE"
+
+  token_contents_must_not_be_logged:
+    true
+
+  token_contents_must_not_be_written_to_qc:
+    true
+
+  token_hash_must_not_be_written_to_qc:
+    true
+
+  require_token_file_for_download_readiness:
+    true
+
+
+# ============================================================================
+# Access probe
+#
+# Default M7.3C mode does NOT download any controlled genomic file.
+#
+# probe_enabled=false:
+#   checks local access configuration only.
+#
+# A later explicitly enabled probe may test authorization against one
+# controlled file without treating the file as analytically downloaded.
+# ============================================================================
+
+access_probe:
+
+  enabled:
+    false
+
+  mode:
+    "NO_REMOTE_FILE_PROBE"
+
+  data_endpoint:
+    "https://api.gdc.cancer.gov/data"
+
+  timeout_seconds:
+    30
+
+  verify_ssl:
+    true
+
+  maximum_probe_files:
+    1
+
+  allow_full_bam_download:
+    false
+
+  analytical_file_download_performed:
+    false
+
+
+# ============================================================================
+# Resource readiness
+# ============================================================================
+
+resource_policy:
+
+  require_controlled_aligned_mirna_bam:
+    true
+
+  require_sequence_ready_candidate:
+    true
+
+  require_nonzero_case_coverage:
+    true
+
+  require_released_resource:
+    true
+
+  require_tcga_prad_scope:
+    true
+
+  allow_open_processed_mirna_substitution:
+    false
+
+  allow_unresolved_sequence_candidate:
+    false
+
+
+# ============================================================================
+# Execution policy
+# ============================================================================
+
+execution_policy:
+
+  download_allowed_in_m7_3c:
+    false
+
+  read_counting_allowed_in_m7_3c:
+    false
+
+  quantification_allowed_in_m7_3c:
+    false
+
+  clinical_association_allowed_in_m7_3c:
+    false
+
+  require_separate_execution_stage:
+    true
+
+
+# ============================================================================
+# Status codes
+# ============================================================================
+
+statuses:
+
+  candidate:
+
+    sequence_blocked:
+      "CONTROLLED_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+    controlled_resource_absent:
+      "CONTROLLED_QUANTIFICATION_BLOCKED_RESOURCE_ABSENT"
+
+    token_not_configured:
+      "CONTROLLED_QUANTIFICATION_TOKEN_NOT_CONFIGURED"
+
+    token_file_missing:
+      "CONTROLLED_QUANTIFICATION_TOKEN_FILE_MISSING"
+
+    token_file_unreadable:
+      "CONTROLLED_QUANTIFICATION_TOKEN_FILE_UNREADABLE"
+
+    authorization_not_tested:
+      "CONTROLLED_QUANTIFICATION_RESOURCE_READY_AUTHORIZATION_NOT_TESTED"
+
+    authorization_confirmed:
+      "CONTROLLED_QUANTIFICATION_READY_FOR_SECURE_DOWNLOAD"
+
+    authorization_failed:
+      "CONTROLLED_QUANTIFICATION_AUTHORIZATION_FAILED"
+
+
+  overall:
+
+    access_configuration_required:
+      "CONTROLLED_ACCESS_CONFIGURATION_REQUIRED"
+
+    authorization_pending:
+      "CONTROLLED_ACCESS_AUTHORIZATION_PENDING"
+
+    ready_for_download:
+      "CONTROLLED_ACCESS_READY_FOR_QUANTIFICATION_DOWNLOAD"
+
+    blocked:
+      "CONTROLLED_ACCESS_QUANTIFICATION_BLOCKED"
+
+
+# ============================================================================
+# Scientific / security safeguards
+# ============================================================================
+
+scientific_policy:
+
+  bam_download_performed:
+    false
+
+  read_counting_performed:
+    false
+
+  trf_quantification_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  processed_mirna_used_as_trf_measurement:
+    false
+
+  unresolved_trf_quantified:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  sequence_inference_performed:
+    false
+
+  authorization_inferred_from_resource_existence:
+    false
+
+  token_contents_persisted:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_ready_for_download:
+    "M7.3D_CONTROLLED_TRF_QUANTIFICATION_EXECUTION"
+
+  if_authorization_pending:
+    "M7.3C_RESOLVE_CONTROLLED_ACCESS"
+
+  if_access_not_configured:
+    "M7.3C_CONFIGURE_GDC_CONTROLLED_ACCESS"
+
+  if_blocked:
+    "M7.4_CLINICAL_VALIDATION_WITHOUT_DIRECT_TRF_QUANTIFICATION"

@@ -1,0 +1,336 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_endpoint_resolution.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.2B
+
+stage: clinical_endpoint_readiness_resolution
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  clinical_cohort:
+
+    relative_path:
+      "data/processed/m7/qc/m7_2_clinical_cohort.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.2"
+
+    expected_stage:
+      "tcga_prad_clinical_cohort_construction"
+
+    expected_project:
+      "TCGA-PRAD"
+
+
+# ============================================================================
+# Time-to-event endpoint policy
+# ============================================================================
+
+time_to_event_policy:
+
+  require_upstream_endpoint_ready:
+    true
+
+  require_censored_observations:
+    true
+
+  minimum_events:
+    20
+
+  minimum_usable_fraction:
+    0.50
+
+  minimum_usable_cases:
+    20
+
+  allow_primary_endpoint_if_not_ready:
+    false
+
+  allow_endpoint_selection_by_significance:
+    false
+
+  allow_relaxed_threshold_after_observing_data:
+    false
+
+
+# ============================================================================
+# Time-to-event interpretation
+# ============================================================================
+
+time_to_event_endpoints:
+
+  OVERALL_SURVIVAL:
+
+    endpoint_class:
+      "TIME_TO_EVENT"
+
+    if_not_ready:
+      "RETAIN_DESCRIPTIVE_ONLY"
+
+    insufficient_events_status:
+      "TIME_TO_EVENT_NOT_SELECTED_INSUFFICIENT_EVENTS"
+
+    insufficient_completeness_status:
+      "TIME_TO_EVENT_NOT_SELECTED_INSUFFICIENT_COMPLETENESS"
+
+    no_censoring_status:
+      "TIME_TO_EVENT_NOT_SELECTED_NO_ANALYZABLE_CENSORING"
+
+
+  RECURRENCE_PROGRESSION:
+
+    endpoint_class:
+      "TIME_TO_EVENT"
+
+    if_not_ready:
+      "DO_NOT_MODEL"
+
+    insufficient_events_status:
+      "TIME_TO_EVENT_NOT_SELECTED_INSUFFICIENT_EVENTS"
+
+    insufficient_completeness_status:
+      "TIME_TO_EVENT_NOT_SELECTED_INSUFFICIENT_COMPLETENESS"
+
+    no_censoring_status:
+      "TIME_TO_EVENT_NOT_SELECTED_NO_ANALYZABLE_CENSORING"
+
+
+# ============================================================================
+# Clinicopathologic endpoint readiness
+#
+# M7.2B only assesses availability/readiness.
+#
+# It does NOT fit association models.
+# ============================================================================
+
+clinicopathologic_policy:
+
+  minimum_non_missing_fraction:
+    0.80
+
+  minimum_non_missing_cases:
+    100
+
+  require_variation:
+    true
+
+  allow_missing_imputation:
+    false
+
+  allow_stage_reconstruction:
+    false
+
+  allow_grade_reconstruction:
+    false
+
+
+clinicopathologic_variables:
+
+  pathologic_t:
+
+    source_column:
+      "ajcc_pathologic_t"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_STAGE"
+
+    downstream_role:
+      "CANDIDATE_CLINICAL_ASSOCIATION_ENDPOINT"
+
+
+  pathologic_n:
+
+    source_column:
+      "ajcc_pathologic_n"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_STAGE"
+
+    downstream_role:
+      "CANDIDATE_CLINICAL_ASSOCIATION_ENDPOINT"
+
+
+  clinical_t:
+
+    source_column:
+      "ajcc_clinical_t"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_STAGE"
+
+    downstream_role:
+      "CANDIDATE_CLINICAL_ASSOCIATION_ENDPOINT"
+
+
+  clinical_m:
+
+    source_column:
+      "ajcc_clinical_m"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_STAGE"
+
+    downstream_role:
+      "CANDIDATE_CLINICAL_ASSOCIATION_ENDPOINT"
+
+
+  tumor_grade:
+
+    source_column:
+      "tumor_grade"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_GRADE"
+
+    downstream_role:
+      "NOT_CURRENTLY_AVAILABLE"
+
+
+  pathologic_stage:
+
+    source_column:
+      "ajcc_pathologic_stage"
+
+    endpoint_class:
+      "CLINICOPATHOLOGIC_STAGE"
+
+    downstream_role:
+      "NOT_CURRENTLY_AVAILABLE"
+
+
+# ============================================================================
+# Final statuses
+# ============================================================================
+
+statuses:
+
+  time_to_event:
+
+    primary_endpoint_available:
+      "PRIMARY_TIME_TO_EVENT_ENDPOINT_AVAILABLE"
+
+    no_primary_endpoint:
+      "NO_PRIMARY_TIME_TO_EVENT_ENDPOINT_ESTABLISHED"
+
+
+  clinicopathologic:
+
+    ready:
+      "CLINICOPATHOLOGIC_ENDPOINT_READY"
+
+    insufficient_completeness:
+      "CLINICOPATHOLOGIC_ENDPOINT_NOT_READY_INSUFFICIENT_COMPLETENESS"
+
+    insufficient_cases:
+      "CLINICOPATHOLOGIC_ENDPOINT_NOT_READY_INSUFFICIENT_CASES"
+
+    insufficient_variation:
+      "CLINICOPATHOLOGIC_ENDPOINT_NOT_READY_INSUFFICIENT_VARIATION"
+
+
+  overall:
+
+    clinical_route_continues:
+      "CLINICAL_VALIDATION_CONTINUES_WITH_CLINICOPATHOLOGIC_ENDPOINTS"
+
+    clinical_route_blocked:
+      "CLINICAL_VALIDATION_BLOCKED_NO_USABLE_ENDPOINTS"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  primary_survival_endpoint_selected:
+    false
+
+  survival_model_fitted:
+    false
+
+  cox_model_fitted:
+    false
+
+  kaplan_meier_performed:
+    false
+
+  recurrence_model_fitted:
+    false
+
+  clinicopathologic_model_fitted:
+    false
+
+  endpoint_selected_by_significance:
+    false
+
+  endpoint_threshold_relaxed_after_data_review:
+    false
+
+  missing_event_imputed:
+    false
+
+  missing_follow_up_imputed:
+    false
+
+  missing_stage_imputed:
+    false
+
+  missing_grade_imputed:
+    false
+
+  stage_reconstructed:
+    false
+
+  grade_reconstructed:
+    false
+
+  candidate_trf_join_performed:
+    false
+
+  genotype_join_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stages
+# ============================================================================
+
+next_stage:
+
+  primary:
+    "M7.3A_CANDIDATE_TRF_SEQUENCE_RESOLUTION"
+
+  downstream_if_trf_quantifiable:
+    "M7.4_CLINICOPATHOLOGIC_ASSOCIATION"
+
+  time_to_event:
+    "NO_PRIMARY_TIME_TO_EVENT_MODEL"
+
+  survival:
+    "RETAIN_OVERALL_SURVIVAL_AS_DESCRIPTIVE_ONLY"

@@ -1,0 +1,204 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_controlled_access_limitation.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M7.3C
+
+stage: controlled_access_limitation_resolution
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  quantification_feasibility:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3b_trf_quantification_feasibility.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M7.3B"
+
+    expected_stage:
+      "trf_quantification_feasibility"
+
+    expected_overall_status:
+      "TRF_QUANTIFICATION_FEASIBLE_VIA_CONTROLLED_ACCESS"
+
+
+# ============================================================================
+# Access state
+# ============================================================================
+
+access_state:
+
+  controlled_resource_identified:
+    true
+
+  authorized_access_available_at_analysis_time:
+    false
+
+  gdc_token_available:
+    false
+
+  dbgap_project_authorization_available:
+    false
+
+  access_limitation_confirmed_by_researcher:
+    true
+
+
+# ============================================================================
+# Interpretation
+# ============================================================================
+
+interpretation:
+
+  resource_absent:
+    false
+
+  resource_technically_available:
+    true
+
+  resource_accessible_to_current_analysis:
+    false
+
+  quantification_deferred:
+    true
+
+  quantification_failed:
+    false
+
+  candidate_expression_negative:
+    false
+
+
+# ============================================================================
+# TCGA expression policy
+# ============================================================================
+
+tcga_expression_policy:
+
+  direct_trf_quantification_performed:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  processed_isoform_used_as_trf_substitute:
+    false
+
+  unresolved_trf_quantified:
+    false
+
+  expression_value_imputed:
+    false
+
+  absence_of_quantification_interpreted_as_zero_expression:
+    false
+
+
+# ============================================================================
+# Clinical association policy
+# ============================================================================
+
+clinical_association_policy:
+
+  clinical_endpoint_branch_retained:
+    true
+
+  trf_expression_clinical_association_performed:
+    false
+
+  trf_expression_clinical_association_deferred:
+    true
+
+  clinical_endpoints_interpreted_as_negative:
+    false
+
+
+# ============================================================================
+# Status codes
+# ============================================================================
+
+statuses:
+
+  candidate_access_blocked:
+    "DIRECT_TCGA_TRF_QUANTIFICATION_DEFERRED_CONTROLLED_ACCESS"
+
+  sequence_unresolved:
+    "DIRECT_TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+  overall:
+    "CONTROLLED_ACCESS_UNAVAILABLE_AT_ANALYSIS_TIME"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  bam_download_performed:
+    false
+
+  read_counting_performed:
+    false
+
+  tcga_trf_quantification_performed:
+    false
+
+  processed_mirna_used_as_trf_measurement:
+    false
+
+  sequence_inference_performed:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  expression_association_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  access_limitation_interpreted_as_negative_evidence:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stages
+# ============================================================================
+
+next_stage:
+
+  external_validation:
+    "M7.4A_OPEN_SMALL_RNA_DATASET_DISCOVERY"
+
+  variant_validation:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"
+
+  clinical_route:
+    "RETAIN_CLINICAL_ENDPOINTS_ASSOCIATION_DEFERRED"

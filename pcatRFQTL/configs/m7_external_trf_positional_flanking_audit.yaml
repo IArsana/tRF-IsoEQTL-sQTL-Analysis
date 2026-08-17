@@ -1,0 +1,363 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_external_trf_positional_flanking_audit.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone:
+  "M7.4C.2B"
+
+stage:
+  "external_trf_positional_flanking_audit"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  exact_sequence_counting:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4c2_external_trf_exact_sequence_counting.json"
+
+    expected_milestone:
+      "M7.4C.2"
+
+    expected_stage:
+      "external_trf_exact_candidate_sequence_counting"
+
+    expected_execution_mode:
+      "full"
+
+    expected_overall_status:
+      "EXTERNAL_CANDIDATE_TRF_SEQUENCE_OBSERVED"
+
+
+# ============================================================================
+# Candidate
+# ============================================================================
+
+candidate:
+
+  lead_rsid:
+    "rs10216902"
+
+  trf_id:
+    "tRF-24-S3M8309N0Y"
+
+  exact_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  sequence_length_nt:
+    24
+
+
+# ============================================================================
+# Dataset
+# ============================================================================
+
+dataset:
+
+  dataset_key:
+    "m7_gse80400"
+
+  geo_accession:
+    "GSE80400"
+
+  sra_study:
+    "SRP073456"
+
+
+# ============================================================================
+# Runs
+# ============================================================================
+
+runs:
+
+  - "SRR3400531"
+  - "SRR3400532"
+  - "SRR3400533"
+  - "SRR3400534"
+  - "SRR3400535"
+  - "SRR3400536"
+  - "SRR3400537"
+  - "SRR3400538"
+  - "SRR3400539"
+  - "SRR3400540"
+  - "SRR3400541"
+
+
+# ============================================================================
+# FASTQ
+# ============================================================================
+
+fastq:
+
+  directory:
+    "data/raw/m7/gse80400/fastq"
+
+  filename_template:
+    "{run_accession}.fastq"
+
+
+# ============================================================================
+# Read-length policy
+#
+# IMPORTANT:
+# 15-35 nt remains the canonical comparison window.
+#
+# M7.4C.2B additionally audits EVERY read length so that shorter and longer
+# reads are not discarded before motif-position analysis.
+# ============================================================================
+
+read_length_policy:
+
+  canonical_min_nt:
+    15
+
+  canonical_max_nt:
+    35
+
+  audit_all_read_lengths:
+    true
+
+  search_candidate_before_length_filter:
+    true
+
+  retain_short_reads_for_qc:
+    true
+
+  retain_long_reads_for_qc:
+    true
+
+  length_bins:
+
+    - name: "LT15"
+      min_nt: null
+      max_nt: 14
+
+    - name: "15_TO_23"
+      min_nt: 15
+      max_nt: 23
+
+    - name: "24"
+      min_nt: 24
+      max_nt: 24
+
+    - name: "25_TO_35"
+      min_nt: 25
+      max_nt: 35
+
+    - name: "36_TO_50"
+      min_nt: 36
+      max_nt: 50
+
+    - name: "51_TO_100"
+      min_nt: 51
+      max_nt: 100
+
+    - name: "GT100"
+      min_nt: 101
+      max_nt: null
+
+
+# ============================================================================
+# Sequence audit
+# ============================================================================
+
+sequence_audit:
+
+  exact_matching_only:
+    true
+
+  allow_mismatches:
+    false
+
+  allow_indels:
+    false
+
+  reverse_complement_search:
+    false
+
+  search_all_read_lengths:
+    true
+
+  classify_full_length:
+    true
+
+  classify_substring:
+    true
+
+  record_candidate_start:
+    true
+
+  record_candidate_end:
+    true
+
+  record_left_flank:
+    true
+
+  record_right_flank:
+    true
+
+  maximum_flank_sequence_nt:
+    25
+
+
+# ============================================================================
+# Boundary classification
+# ============================================================================
+
+boundary_classes:
+
+  full_length:
+    "FULL_LENGTH_24NT"
+
+  five_prime_boundary:
+    "CANDIDATE_AT_5PRIME_BOUNDARY"
+
+  three_prime_boundary:
+    "CANDIDATE_AT_3PRIME_BOUNDARY"
+
+  internal:
+    "CANDIDATE_INTERNAL"
+
+  multiple_occurrences:
+    "MULTIPLE_EXACT_OCCURRENCES"
+
+
+# ============================================================================
+# Interpretation
+# ============================================================================
+
+interpretation:
+
+  full_length_support:
+    "DIRECT_24NT_SEQUENCE_LEVEL_SUPPORT"
+
+  boundary_support:
+    "BOUNDARY_COMPATIBLE_EXACT_SEQUENCE_SUPPORT"
+
+  internal_support:
+    "INTERNAL_EXACT_MOTIF_SUPPORT_ONLY"
+
+  all_substring_support:
+    "EXACT_MOTIF_OBSERVED_WITHOUT_DIRECT_24NT_FRAGMENT_SUPPORT"
+
+  zero_short_or_long_reads_means_absence:
+    false
+
+  motif_detection_establishes_parent_trna:
+    false
+
+  motif_detection_establishes_genomic_origin:
+    false
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/external_trf_positional_flanking_audit"
+
+  run_summary_filename:
+    "gse80400_positional_flanking_run_summary.parquet"
+
+  length_distribution_filename:
+    "gse80400_read_length_distribution.parquet"
+
+  motif_context_filename:
+    "gse80400_exact_motif_context.parquet"
+
+  motif_context_aggregate_filename:
+    "gse80400_exact_motif_context_aggregate.parquet"
+
+  overall_summary_filename:
+    "external_trf_positional_flanking_audit_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_4c2b_external_trf_positional_flanking_audit.json"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  approximate_matching_performed:
+    false
+
+  mismatch_rescue_performed:
+    false
+
+  indel_rescue_performed:
+    false
+
+  read_length_imputation_performed:
+    false
+
+  artificial_read_extension_performed:
+    false
+
+  artificial_read_truncation_performed:
+    false
+
+  parent_trna_inference_performed:
+    false
+
+  genomic_origin_inference_performed:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Status
+# ============================================================================
+
+statuses:
+
+  direct_fragment_support:
+    "DIRECT_24NT_CANDIDATE_FRAGMENT_OBSERVED"
+
+  boundary_compatible:
+    "EXACT_CANDIDATE_SEQUENCE_WITH_BOUNDARY_COMPATIBLE_READS"
+
+  motif_only:
+    "EXACT_CANDIDATE_MOTIF_OBSERVED_WITHOUT_DIRECT_FRAGMENT_SUPPORT"
+
+  not_observed:
+    "EXACT_CANDIDATE_SEQUENCE_NOT_OBSERVED"
+
+  overall_complete:
+    "EXTERNAL_TRF_POSITIONAL_CONTEXT_AUDIT_COMPLETE"
+
+
+# ============================================================================
+# Next
+# ============================================================================
+
+next_stage:
+
+  "M7.4C.2C_CANDIDATE_FRAGMENT_INTERPRETATION"

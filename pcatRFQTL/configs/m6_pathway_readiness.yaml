@@ -1,0 +1,226 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_pathway_readiness.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.4B
+
+stage: pathway_readiness_assessment
+
+
+# ============================================================================
+# Upstream QC
+# ============================================================================
+
+upstream_qc:
+
+  candidate_gene_integration:
+
+    relative_path:
+      "data/processed/m6/qc/m6_3_candidate_gene_integration.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M6.3"
+
+    expected_stage:
+      "candidate_to_gene_integration"
+
+
+  trf_biological_annotation:
+
+    relative_path:
+      "data/processed/m6/qc/m6_4a_trf_biological_annotation.json"
+
+    required:
+      true
+
+    expected_milestone:
+      "M6.4A"
+
+    expected_stage:
+      "candidate_trf_biological_annotation"
+
+
+# ============================================================================
+# Pathway gene-set readiness policy
+#
+# M6.4B does NOT perform enrichment.
+#
+# It only determines whether a defensible gene set exists.
+# ============================================================================
+
+readiness_policy:
+
+  minimum_unique_genes:
+    5
+
+  require_resolved_gene_identity:
+    true
+
+  require_source_supported_assignment:
+    true
+
+  allow_source_reproducible_event_gene:
+    true
+
+  allow_source_reported_gene:
+    true
+
+  allow_external_curated_gene:
+    false
+
+  allow_nearest_gene:
+    false
+
+  allow_snp_proximity_gene:
+    false
+
+  allow_cis_proximity_gene:
+    false
+
+  allow_unresolved_regulatory_feature_as_gene:
+    false
+
+  allow_candidate_without_gene:
+    false
+
+  deduplicate_gene_identifiers:
+    true
+
+  require_nonempty_background:
+    false
+
+
+# ============================================================================
+# Allowed gene assignment methods
+#
+# These correspond to assignments already established upstream.
+# M6.4B does not create new gene assignments.
+# ============================================================================
+
+allowed_gene_assignment_methods:
+
+  - "SOURCE_REPORTED_GENE"
+  - "SOURCE_REPRODUCIBLE_EVENT_GENE"
+  - "SOURCE_COMPATIBLE_GENE"
+
+
+# ============================================================================
+# Readiness statuses
+# ============================================================================
+
+status:
+
+  ready:
+    "PATHWAY_ENRICHMENT_READY"
+
+  no_resolved_genes:
+    "PATHWAY_ENRICHMENT_BLOCKED_NO_RESOLVED_GENES"
+
+  insufficient_gene_count:
+    "PATHWAY_ENRICHMENT_BLOCKED_INSUFFICIENT_GENES"
+
+  unsupported_gene_provenance:
+    "PATHWAY_ENRICHMENT_BLOCKED_UNSUPPORTED_GENE_PROVENANCE"
+
+  empty_candidate_set:
+    "PATHWAY_ENRICHMENT_BLOCKED_NO_CANDIDATES"
+
+
+# ============================================================================
+# Candidate exclusion reasons
+# ============================================================================
+
+candidate_exclusion_reason:
+
+  regulatory_feature_gene_unresolved:
+    "REGULATORY_FEATURE_GENE_UNRESOLVED"
+
+  no_defensible_gene_assignment:
+    "NO_DEFENSIBLE_GENE_ASSIGNMENT"
+
+  unsupported_gene_assignment_method:
+    "UNSUPPORTED_GENE_ASSIGNMENT_METHOD"
+
+  gene_identity_missing:
+    "GENE_IDENTITY_MISSING"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  enrichment_performed:
+    false
+
+  pathway_analysis_performed:
+    false
+
+  gene_set_imputed:
+    false
+
+  gene_assignment_created:
+    false
+
+  nearest_gene_added:
+    false
+
+  snp_proximity_gene_added:
+    false
+
+  cis_proximity_gene_added:
+    false
+
+  unresolved_feature_converted_to_gene:
+    false
+
+  regulatory_feature_interpreted_as_gene:
+    false
+
+  trf_interpreted_as_gene:
+    false
+
+  pathway_claim_generated:
+    false
+
+  causal_pathway_claim_generated:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_ready:
+    "M6.5_PATHWAY_ENRICHMENT"
+
+  if_blocked:
+    "M7_CLINICAL_VALIDATION_WITHOUT_M6_PATHWAY_ENRICHMENT"

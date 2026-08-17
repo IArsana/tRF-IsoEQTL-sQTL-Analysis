@@ -1,0 +1,583 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_external_clinical_association_readiness.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone:
+  "M7.4D"
+
+stage:
+  "external_clinical_association_readiness"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  fragment_interpretation:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4c2c_candidate_fragment_interpretation.json"
+
+    expected_milestone:
+      "M7.4C.2C"
+
+    expected_stage:
+      "candidate_fragment_interpretation"
+
+    expected_overall_status:
+      "CANDIDATE_FRAGMENT_INTERPRETATION_COMPLETE"
+
+    expected_evidence_class:
+      "CANDIDATE_5PRIME_SEQUENCE_WITH_LONGER_FRAGMENT_CONTEXT"
+
+
+# ============================================================================
+# Molecular abundance input
+#
+# M7.4D does NOT reinterpret this as validated mature 24-nt tRF abundance.
+# The quantitative variable remains exact candidate-sequence evidence.
+# ============================================================================
+
+molecular_input:
+
+  run_counts_relative_path:
+    "data/processed/m7/external_trf_exact_sequence_counting/gse80400_candidate_exact_sequence_counts.parquet"
+
+  expected_runs:
+    11
+
+  abundance_variable:
+    "candidate_cpm"
+
+  abundance_interpretation:
+    "EXACT_CANDIDATE_SEQUENCE_MOTIF_ABUNDANCE"
+
+  mature_24nt_trf_abundance_claimed:
+    false
+
+
+# ============================================================================
+# Dataset
+# ============================================================================
+
+dataset:
+
+  dataset_key:
+    "m7_gse80400"
+
+  geo_accession:
+    "GSE80400"
+
+  sra_study:
+    "SRP073456"
+
+  source:
+    "NCBI_GEO"
+
+  sample_count:
+    11
+
+
+# ============================================================================
+# Source-verified GEO sample titles
+#
+# Keep source terminology.
+# Do not silently recode uncertain categories.
+# ============================================================================
+
+source_samples:
+
+  - geo_accession: "GSM2125974"
+    source_title: "Group 1 NAP"
+    source_group_number: 1
+
+  - geo_accession: "GSM2125975"
+    source_title: "Group 2. BPH"
+    source_group_number: 2
+
+  - geo_accession: "GSM2125976"
+    source_title: "Group 3. PCa 6 cured"
+    source_group_number: 3
+
+  - geo_accession: "GSM2125977"
+    source_title: "Group 4. PCa 6 recurrent"
+    source_group_number: 4
+
+  - geo_accession: "GSM2125978"
+    source_title: "Group 5. PCa 7 recurrent"
+    source_group_number: 5
+
+  - geo_accession: "GSM2125979"
+    source_title: "Group 6. PCa 8 recurrent"
+    source_group_number: 6
+
+  - geo_accession: "GSM2125980"
+    source_title: "Group 7. PCa TURP hormone refractory disease"
+    source_group_number: 7
+
+  - geo_accession: "GSM2125981"
+    source_title: "Group 8. LN-PCa"
+    source_group_number: 8
+
+  - geo_accession: "GSM2125982"
+    source_title: "Group 9. PCa 6 recurrent no chromosomal alterations"
+    source_group_number: 9
+
+  - geo_accession: "GSM2125983"
+    source_title: "Group 10. PCa 6 TMPRSS2-ERG fusion"
+    source_group_number: 10
+
+  - geo_accession: "GSM2125984"
+    source_title: "Group 11. FFPE of group 3"
+    source_group_number: 11
+
+
+# ============================================================================
+# Source-supported clinical parsing
+#
+# Parsing is deliberately conservative.
+#
+# "not_reported" must never be interpreted as "no".
+# ============================================================================
+
+clinical_annotations:
+
+  GSM2125974:
+    broad_class: "REFERENCE"
+    prostate_cancer: false
+    bph: false
+    gleason_score: null
+    recurrence_explicit: null
+    cured_explicit: null
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125975:
+    broad_class: "BPH"
+    prostate_cancer: false
+    bph: true
+    gleason_score: null
+    recurrence_explicit: null
+    cured_explicit: null
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125976:
+    broad_class: "PCA_PRIMARY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 6
+    recurrence_explicit: false
+    cured_explicit: true
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125977:
+    broad_class: "PCA_PRIMARY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 6
+    recurrence_explicit: true
+    cured_explicit: false
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125978:
+    broad_class: "PCA_PRIMARY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 7
+    recurrence_explicit: true
+    cured_explicit: false
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125979:
+    broad_class: "PCA_PRIMARY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 8
+    recurrence_explicit: true
+    cured_explicit: false
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125980:
+    broad_class: "PCA_HORMONE_REFRACTORY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: null
+    recurrence_explicit: null
+    cured_explicit: null
+    hormone_refractory_explicit: true
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125981:
+    broad_class: "LN_PCA"
+    prostate_cancer: true
+    bph: false
+    gleason_score: null
+    recurrence_explicit: null
+    cured_explicit: null
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: true
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125982:
+    broad_class: "PCA_PRIMARY"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 6
+    recurrence_explicit: true
+    cured_explicit: false
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125983:
+    broad_class: "PCA_PRIMARY_MOLECULAR_SUBGROUP"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 6
+    recurrence_explicit: null
+    cured_explicit: null
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: false
+    derived_from_group: null
+
+  GSM2125984:
+    broad_class: "PCA_FFPE_DERIVED"
+    prostate_cancer: true
+    bph: false
+    gleason_score: 6
+    recurrence_explicit: false
+    cured_explicit: true
+    hormone_refractory_explicit: false
+    lymph_node_pca_explicit: false
+    ffpe: true
+    derived_from_group: 3
+
+
+# ============================================================================
+# Run-to-GEO mapping
+#
+# IMPORTANT:
+# This mapping must be source verified before inferential modeling.
+#
+# M7.4D readiness does NOT rely on this mapping for declaring an endpoint
+# association-ready.
+# ============================================================================
+
+run_mapping_policy:
+
+  run_to_geo_mapping_verified:
+    false
+
+  permit_association_if_mapping_unverified:
+    false
+
+  infer_mapping_from_accession_order:
+    false
+
+
+# ============================================================================
+# Endpoint definitions
+# ============================================================================
+
+endpoints:
+
+  tumor_reference:
+
+    endpoint_type:
+      "BINARY"
+
+    description:
+      "PCa versus non-PCa/reference tissue"
+
+    minimum_cases_per_group:
+      3
+
+    require_run_sample_mapping:
+      true
+
+    allow_reference_plus_bph_pooling:
+      false
+
+
+  recurrence:
+
+    endpoint_type:
+      "BINARY"
+
+    description:
+      "Explicit recurrent versus explicit cured PCa"
+
+    minimum_cases_per_group:
+      3
+
+    require_explicit_status:
+      true
+
+    require_run_sample_mapping:
+      true
+
+    missing_status_is_non_event:
+      false
+
+
+  gleason:
+
+    endpoint_type:
+      "ORDINAL"
+
+    description:
+      "Source-reported Gleason score"
+
+    minimum_total_samples:
+      10
+
+    minimum_samples_per_category:
+      3
+
+    require_at_least_categories:
+      2
+
+    require_run_sample_mapping:
+      true
+
+
+  hormone_refractory:
+
+    endpoint_type:
+      "BINARY"
+
+    description:
+      "Explicit hormone-refractory disease"
+
+    minimum_positive_cases:
+      3
+
+    minimum_negative_cases:
+      3
+
+    require_run_sample_mapping:
+      true
+
+
+  lymph_node_pca:
+
+    endpoint_type:
+      "BINARY"
+
+    description:
+      "Explicit LN-PCa status"
+
+    minimum_positive_cases:
+      3
+
+    minimum_negative_cases:
+      3
+
+    require_run_sample_mapping:
+      true
+
+
+  tmprss2_erg:
+
+    endpoint_type:
+      "BINARY"
+
+    description:
+      "Explicit TMPRSS2-ERG molecular subgroup"
+
+    minimum_positive_cases:
+      3
+
+    minimum_negative_cases:
+      3
+
+    require_run_sample_mapping:
+      true
+
+
+# ============================================================================
+# Cohort-level policy
+# ============================================================================
+
+readiness_policy:
+
+  minimum_total_independent_samples_for_association:
+    10
+
+  minimum_group_size:
+    3
+
+  require_verified_run_to_sample_mapping:
+    true
+
+  duplicate_or_derived_material_not_independent:
+    true
+
+  ffpe_requires_sensitivity_analysis:
+    true
+
+  heterogeneous_source_groups_require_caution:
+    true
+
+  descriptive_molecular_validation_allowed:
+    true
+
+  inferential_clinical_association_requires_ready_endpoint:
+    true
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  endpoint:
+
+    ready:
+      "ASSOCIATION_READY"
+
+    insufficient_group_support:
+      "NOT_READY_INSUFFICIENT_GROUP_SUPPORT"
+
+    incomplete_metadata:
+      "NOT_READY_INCOMPLETE_CLINICAL_METADATA"
+
+    mapping_unverified:
+      "NOT_READY_RUN_SAMPLE_MAPPING_UNVERIFIED"
+
+    heterogeneous:
+      "NOT_READY_HETEROGENEOUS_CLINICAL_DEFINITION"
+
+
+  overall:
+
+    ready:
+      "EXTERNAL_CLINICAL_ASSOCIATION_ROUTE_AVAILABLE"
+
+    descriptive_only:
+      "EXTERNAL_MOLECULAR_VALIDATION_RETAINED_CLINICAL_ASSOCIATION_NOT_JUSTIFIED"
+
+    no_route:
+      "EXTERNAL_CLINICAL_ASSOCIATION_NOT_AVAILABLE"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  readiness_audit_only:
+    true
+
+  association_model_fitted:
+    false
+
+  hypothesis_test_performed:
+    false
+
+  p_value_calculated:
+    false
+
+  effect_size_estimated:
+    false
+
+  survival_analysis_performed:
+    false
+
+  recurrence_model_performed:
+    false
+
+  group_pooling_performed:
+    false
+
+  missing_recurrence_interpreted_as_no:
+    false
+
+  run_sample_mapping_inferred_from_accession_order:
+    false
+
+  ffpe_treated_as_independent_without_verification:
+    false
+
+  mature_24nt_trf_abundance_claimed:
+    false
+
+  clinical_validation_claimed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/external_clinical_association_readiness"
+
+  sample_inventory_filename:
+    "gse80400_clinical_sample_inventory.parquet"
+
+  endpoint_readiness_filename:
+    "gse80400_clinical_endpoint_readiness.parquet"
+
+  summary_filename:
+    "external_clinical_association_readiness_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_4d_external_clinical_association_readiness.json"
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_ready:
+    "M7.4D_EXTERNAL_CLINICAL_ASSOCIATION"
+
+  if_descriptive_only:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

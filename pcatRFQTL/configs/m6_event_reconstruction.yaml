@@ -1,0 +1,437 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_event_reconstruction.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.2C.1
+
+stage: fase_event_reconstruction_feasibility_audit
+
+
+# ============================================================================
+# Upstream M6.2B
+# ============================================================================
+
+upstream_qc:
+
+  regulatory_gene_annotation:
+
+    relative_path:
+      "data/processed/m6/qc/m6_2b_regulatory_gene_annotation.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.2B"
+
+    expected_stage:
+      "regulatory_feature_to_source_gene_annotation"
+
+    expected_unresolved_status:
+      "SOURCE_ANNOTATION_ARTIFACT_NOT_AVAILABLE"
+
+
+# ============================================================================
+# Reconstruction target
+#
+# Targets are inherited from M6.2B.
+# No regulatory feature is manually introduced here.
+# ============================================================================
+
+target_policy:
+
+  require_continue_to_m6_2c:
+    true
+
+  supported_feature_classes:
+    - "INTRON_RETENTION"
+
+
+# ============================================================================
+# FASE reconstruction components
+#
+# IMPORTANT:
+#
+# The presence of INT98200 in Moradi supplementary tables proves that the
+# event identifier was used by the source study.
+#
+# It does NOT prove that:
+#   - the complete FASE event namespace is locally available;
+#   - the original event-to-gene annotation matrix is available;
+#   - the event-generation namespace can be reproduced exactly.
+#
+# Therefore event_identifier_observed and event_namespace_reproducible are
+# treated as different concepts.
+# ============================================================================
+
+reconstruction_components:
+
+  fase_implementation:
+
+    label:
+      "FASE implementation"
+
+    required:
+      true
+
+    expected_role:
+      "Generate and annotate intron-retention events."
+
+    local_search_terms:
+      - "FASE"
+      - "iPrnaseq"
+      - "IntronPointer"
+      - "addAnnotationRnaSeq"
+
+    reproducibility_requirement:
+      "EXACT_OR_VERSIONED_IMPLEMENTATION"
+
+
+  reference_gtf:
+
+    label:
+      "Original reference GTF"
+
+    required:
+      true
+
+    expected_role:
+      "Define exon and intron structures used by the source FASE workflow."
+
+    local_extensions:
+      - ".gtf"
+      - ".gtf.gz"
+
+    reproducibility_requirement:
+      "ORIGINAL_OR_EXACTLY_MATCHED_REFERENCE"
+
+
+  junction_matrix:
+
+    label:
+      "Original junction matrix"
+
+    required:
+      true
+
+    expected_role:
+      "Provide source-compatible junction input to the FASE workflow."
+
+    local_search_terms:
+      - "junction_matrix"
+      - "junctionmatrix"
+      - "junction"
+
+    reproducibility_requirement:
+      "SOURCE_COMPATIBLE_INPUT"
+
+
+  read_membership_matrix:
+
+    label:
+      "FASE read membership matrix"
+
+    required:
+      true
+
+    expected_role:
+      "Preserve gene-wise exon/meta-feature membership used by FASE."
+
+    local_search_terms:
+      - "readMembershipMatrix"
+      - "read_membership_matrix"
+
+    reproducibility_requirement:
+      "SOURCE_GENERATED_OR_REPRODUCIBLE"
+
+
+  intron_membership_matrix:
+
+    label:
+      "FASE intron membership matrix"
+
+    required:
+      true
+
+    expected_role:
+      "Preserve gene-wise intron/meta-feature membership used by FASE."
+
+    local_search_terms:
+      - "intronMembershipMatrix"
+      - "intron_membership_matrix"
+
+    reproducibility_requirement:
+      "SOURCE_GENERATED_OR_REPRODUCIBLE"
+
+
+  annotation_matrix:
+
+    label:
+      "FASE annotation matrix"
+
+    required:
+      true
+
+    expected_role:
+      "Map FASE event IDs to chromosome, start, stop, strand, and gene."
+
+    local_search_terms:
+      - "Annotation.Rdata"
+      - "annotation_matrix"
+      - "fase_annotation"
+
+    reproducibility_requirement:
+      "SOURCE_GENERATED_OR_REPRODUCIBLE"
+
+
+  event_namespace:
+
+    label:
+      "FASE event ID namespace"
+
+    required:
+      true
+
+    expected_role:
+      "Preserve the exact mapping between FASE INT event IDs and source annotations."
+
+    exact_target_event:
+      "INT98200"
+
+    source_event_tables:
+
+      - relative_path:
+          "data/raw/moradi/Supplementary Table S1.xlsx"
+
+        sheet:
+          "Cis-intron-retention-sQTL-0.05"
+
+        feature_column:
+          "splicing_event"
+
+
+      - relative_path:
+          "data/raw/moradi/Supplementary Table S2.xlsx"
+
+        sheet:
+          "Cis-intron-sQTL-GWAS-LD_0.5"
+
+        feature_column:
+          "splicing_event"
+
+
+      - relative_path:
+          "data/raw/moradi/Supplementary Table S7_DE_INT_cis.csv"
+
+        feature_column:
+          "Unnamed: 0"
+
+    reproducibility_requirement:
+      "EXACT_NAMESPACE_REPRODUCTION"
+
+
+  transcript_filtering_rules:
+
+    label:
+      "Transcript and feature filtering rules"
+
+    required:
+      true
+
+    expected_role:
+      "Preserve the transcript and feature universe used before FASE event generation."
+
+    local_search_terms:
+      - "transcript_filtering"
+      - "feature_filtering"
+      - "gtf_filter"
+      - "transcript_filter"
+
+    reproducibility_requirement:
+      "SOURCE_METHOD_IDENTIFIED"
+
+
+# ============================================================================
+# Local artifact search
+#
+# Generic filename search is used for all reconstruction components EXCEPT
+# event_namespace.
+#
+# event_namespace is audited directly against known Moradi source tables.
+# ============================================================================
+
+local_search:
+
+  roots:
+    - "data/raw/moradi"
+    - "data/raw"
+    - "data/interim"
+    - "data/processed"
+
+  inspect_extensions:
+    - ".rdata"
+    - ".rda"
+    - ".rds"
+    - ".gtf"
+    - ".gz"
+    - ".csv"
+    - ".tsv"
+    - ".txt"
+    - ".xlsx"
+    - ".xls"
+    - ".parquet"
+
+  filename_search_case_sensitive:
+    false
+
+
+# ============================================================================
+# Component states
+# ============================================================================
+
+component_states:
+
+  available:
+    "AVAILABLE"
+
+  partial:
+    "PARTIAL"
+
+  event_observed:
+    "EVENT_IDENTIFIER_OBSERVED_NAMESPACE_UNAVAILABLE"
+
+  method_identified:
+    "METHOD_IDENTIFIED_ARTIFACT_UNAVAILABLE"
+
+  not_identified:
+    "NOT_IDENTIFIED"
+
+
+# ============================================================================
+# Reconstruction classification
+# ============================================================================
+
+classification:
+
+  exact:
+    "EXACT_EVENT_RECONSTRUCTION_FEASIBLE"
+
+  source_compatible:
+    "SOURCE_COMPATIBLE_EVENT_RECONSTRUCTION_FEASIBLE"
+
+  approximate_only:
+    "APPROXIMATE_EVENT_RECONSTRUCTION_ONLY"
+
+  not_reproducible:
+    "EVENT_ID_RECONSTRUCTION_NOT_REPRODUCIBLE"
+
+
+# ============================================================================
+# Decision policy
+# ============================================================================
+
+decision_policy:
+
+  exact_reconstruction_requires_all_required_components_available:
+    true
+
+  source_compatible_requires_event_namespace_reproducible:
+    true
+
+  source_compatible_requires_annotation_matrix_reproducible:
+    true
+
+  source_compatible_requires_reference_gtf_identified:
+    true
+
+  approximate_reconstruction_may_use_external_gtf:
+    true
+
+  approximate_reconstruction_allowed_for_gene_assignment:
+    false
+
+  event_identifier_observation_counts_as_namespace_reproduction:
+    false
+
+  event_namespace_must_be_preserved_for_gene_assignment:
+    true
+
+  missing_component_interpreted_as_biological_negative:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  feature_id_decoded_as_coordinate:
+    false
+
+  feature_numeric_suffix_interpreted_as_gtf_row:
+    false
+
+  feature_numeric_suffix_interpreted_as_event_order:
+    false
+
+  qtl_variant_position_used_as_event_position:
+    false
+
+  tag_variant_position_used_as_event_position:
+    false
+
+  nearest_gene_mapping_performed:
+    false
+
+  cis_proximity_gene_assignment_performed:
+    false
+
+  approximate_reconstruction_used_for_gene_assignment:
+    false
+
+  external_gtf_gene_assignment_performed:
+    false
+
+  parent_gene_assigned:
+    false
+
+  event_identifier_observation_treated_as_namespace_reproduction:
+    false
+
+  unresolved_event_interpreted_as_no_gene:
+    false
+
+  regulatory_feature_treated_as_causal:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_exact_or_source_compatible:
+    "M6.2C.2_ACTUAL_EVENT_GENE_RECONSTRUCTION"
+
+  if_approximate_only:
+    "M6.2C.2_RECONSTRUCTION_LIMITATION_RESOLUTION"
+
+  if_not_reproducible:
+    "M6.3_CANDIDATE_GENE_INTEGRATION_WITH_UNRESOLVED_REGULATORY_GENE"

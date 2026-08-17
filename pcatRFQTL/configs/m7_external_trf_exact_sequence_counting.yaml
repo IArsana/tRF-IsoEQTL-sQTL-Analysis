@@ -1,0 +1,352 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_external_trf_exact_sequence_counting.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone:
+  "M7.4C.2"
+
+stage:
+  "external_trf_exact_candidate_sequence_counting"
+
+
+# ============================================================================
+# Locked upstream
+# ============================================================================
+
+upstream_qc:
+
+  raw_read_acquisition:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4c1_external_trf_raw_read_acquisition.json"
+
+    expected_milestone:
+      "M7.4C.1"
+
+    expected_stage:
+      "external_trf_raw_read_acquisition_audit"
+
+    expected_overall_status:
+      "EXTERNAL_RAW_READ_ACQUISITION_READY"
+
+
+# ============================================================================
+# Candidate
+# ============================================================================
+
+candidate:
+
+  lead_rsid:
+    "rs10216902"
+
+  trf_id:
+    "tRF-24-S3M8309N0Y"
+
+  exact_sequence:
+    "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+  sequence_length_nt:
+    24
+
+  sequence_source_supported:
+    true
+
+
+# ============================================================================
+# Dataset
+# ============================================================================
+
+dataset:
+
+  dataset_key:
+    "m7_gse80400"
+
+  geo_accession:
+    "GSE80400"
+
+  sra_study:
+    "SRP073456"
+
+
+# ============================================================================
+# Execution mode
+# ============================================================================
+
+execution:
+
+  mode:
+    "full"
+
+  pilot_run_accessions:
+
+    - "SRR3400531"
+
+  full_run_accessions:
+
+    - "SRR3400531"
+    - "SRR3400532"
+    - "SRR3400533"
+    - "SRR3400534"
+    - "SRR3400535"
+    - "SRR3400536"
+    - "SRR3400537"
+    - "SRR3400538"
+    - "SRR3400539"
+    - "SRR3400540"
+    - "SRR3400541"
+
+
+# ============================================================================
+# Paths
+# ============================================================================
+
+paths:
+
+  sra_cache_directory:
+    "data/raw/m7/gse80400/sra_runs"
+
+  fastq_directory:
+    "data/raw/m7/gse80400/fastq"
+
+  processed_directory:
+    "data/processed/m7/external_trf_exact_sequence_counting"
+
+  run_count_filename:
+    "gse80400_candidate_exact_sequence_counts.parquet"
+
+  summary_filename:
+    "external_trf_exact_sequence_counting_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_4c2_external_trf_exact_sequence_counting.json"
+
+
+# ============================================================================
+# Acquisition
+# ============================================================================
+
+acquisition:
+
+  use_prefetch:
+    true
+
+  validate_prefetched_run:
+    true
+
+  use_fasterq_dump:
+    true
+
+  fasterq_threads:
+    4
+
+  keep_sra_cache:
+    true
+
+  keep_fastq:
+    true
+
+
+# ============================================================================
+# Read preprocessing
+# ============================================================================
+
+preprocessing:
+
+  input_orientation:
+    "forward"
+
+  adapter_trimming:
+
+    enabled:
+      true
+
+    strategy:
+      "suffix_adapter_exact_or_partial"
+
+    adapter_sequence:
+      "CAAGCAGAAGACGGCATACGA"
+
+    minimum_adapter_overlap_nt:
+      6
+
+    adapter_mismatches_allowed:
+      0
+
+  uppercase_reads:
+    true
+
+  remove_empty_after_trim:
+    true
+
+
+# ============================================================================
+# Counting
+# ============================================================================
+
+counting:
+
+  mode:
+    "EXACT_SEQUENCE_ONLY"
+
+  search_reverse_complement:
+    false
+
+  allow_mismatches:
+    false
+
+  allow_indels:
+    false
+
+  approximate_matching:
+    false
+
+  count_occurrences_per_read:
+    false
+
+  count_read_as_positive_if_exact_sequence_present:
+    true
+
+  minimum_read_length_after_trim:
+    15
+
+  maximum_read_length_after_trim:
+    35
+
+
+# ============================================================================
+# Normalization
+# ============================================================================
+
+normalization:
+
+  calculate_cpm:
+    true
+
+  denominator:
+    "usable_reads_after_preprocessing"
+
+  calculate_raw_fraction:
+    true
+
+
+# ============================================================================
+# Interpretation
+# ============================================================================
+
+interpretation:
+
+  positive_exact_count_means:
+    "SOURCE_SUPPORTED_CANDIDATE_SEQUENCE_OBSERVED_IN_EXTERNAL_SMALL_RNA_READS"
+
+  zero_exact_count_means:
+    "NO_EXACT_MATCH_OBSERVED_UNDER_CURRENT_PIPELINE"
+
+  zero_exact_count_is_biological_absence:
+    false
+
+  exact_sequence_establishes_parent_trna_origin:
+    false
+
+  exact_sequence_establishes_genomic_origin:
+    false
+
+  exact_sequence_establishes_causality:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  exact_candidate_sequence_only:
+    true
+
+  approximate_matching_performed:
+    false
+
+  parent_trna_inference_performed:
+    false
+
+  genomic_origin_inference_performed:
+    false
+
+  candidate_substitution_performed:
+    false
+
+  unresolved_candidate_quantification_performed:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  clinical_association_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Status vocabulary
+# ============================================================================
+
+statuses:
+
+  run:
+
+    observed:
+      "EXACT_CANDIDATE_SEQUENCE_OBSERVED"
+
+    not_observed:
+      "NO_EXACT_CANDIDATE_SEQUENCE_MATCH_OBSERVED"
+
+    failed:
+      "RUN_PROCESSING_FAILED"
+
+  overall:
+
+    observed:
+      "EXTERNAL_CANDIDATE_TRF_SEQUENCE_OBSERVED"
+
+    not_observed:
+      "EXTERNAL_CANDIDATE_TRF_EXACT_MATCH_NOT_OBSERVED"
+
+    partial:
+      "EXTERNAL_CANDIDATE_TRF_COUNTING_PARTIAL"
+
+    failed:
+      "EXTERNAL_CANDIDATE_TRF_COUNTING_FAILED"
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  if_pilot_observed:
+    "M7.4C.2_FULL_GSE80400_EXACT_SEQUENCE_COUNTING"
+
+  if_pilot_not_observed:
+    "M7.4C.2_FULL_GSE80400_EXACT_SEQUENCE_COUNTING"
+
+  if_full_complete:
+    "M7.4D_EXTERNAL_CLINICAL_ASSOCIATION_READINESS"
+
+  if_failed:
+    "M7.5_VARIANT_LEVEL_VALIDATION_FEASIBILITY"

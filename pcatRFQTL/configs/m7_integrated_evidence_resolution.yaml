@@ -1,0 +1,964 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m7_integrated_evidence_resolution.yaml
+#
+# Description:
+#   M7.6 Integrated Evidence Resolution.
+#
+#   This stage performs structured evidence synthesis only.
+#   It does NOT perform:
+#     - new association testing;
+#     - meta-analysis;
+#     - colocalization;
+#     - fine-mapping;
+#     - imputation;
+#     - causal inference;
+#     - arbitrary additive scoring.
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+
+milestone:
+  "M7.6"
+
+stage:
+  "integrated_evidence_resolution"
+
+
+# ============================================================================
+# Locked upstream QC
+#
+# M7.6 validates the immediately preceding M7 evidence layers whose paths
+# are already fixed in the project.
+#
+# Older M6 biological evidence is encoded below as locked evidence state,
+# preserving the M6 conclusions without recomputing them.
+# ============================================================================
+
+upstream_qc:
+
+  m7_3c:
+
+    relative_path:
+      "data/processed/m7/qc/m7_3c_controlled_access_limitation.json"
+
+    expected_milestone:
+      "M7.3C"
+
+    expected_stage:
+      "controlled_access_limitation_resolution"
+
+    status_field:
+      "overall_resolution_status"
+
+    expected_status:
+      "CONTROLLED_ACCESS_UNAVAILABLE_AT_ANALYSIS_TIME"
+
+
+  m7_4d:
+
+    relative_path:
+      "data/processed/m7/qc/m7_4d_external_clinical_association_readiness.json"
+
+    expected_milestone:
+      "M7.4D"
+
+    expected_stage:
+      "external_clinical_association_readiness"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "EXTERNAL_MOLECULAR_VALIDATION_RETAINED_CLINICAL_ASSOCIATION_NOT_JUSTIFIED"
+
+
+  m7_5b:
+
+    relative_path:
+      "data/processed/m7/qc/m7_5b_full_summary_statistics_audit.json"
+
+    expected_milestone:
+      "M7.5B"
+
+    expected_stage:
+      "full_summary_statistics_audit"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "FULL_SUMMARY_STATISTICS_EXACT_VARIANT_EVIDENCE_AVAILABLE_INDEPENDENCE_UNRESOLVED"
+
+    required_summary_state:
+
+      exact_variant_rows_found:
+        18
+
+      full_summary_statistics_audit_complete:
+        true
+
+      independent_replications_verified:
+        0
+
+      independent_replication_claimed:
+        false
+
+
+  m7_5c:
+
+    relative_path:
+      "data/processed/m7/qc/m7_5c_study_independence_harmonization.json"
+
+    expected_milestone:
+      "M7.5C"
+
+    expected_stage:
+      "study_independence_and_harmonization_audit"
+
+    status_field:
+      "overall_status"
+
+    expected_status:
+      "MULTI_STUDY_VARIANT_EVIDENCE_DIRECTIONALLY_HETEROGENEOUS_INDEPENDENCE_UNRESOLVED"
+
+    required_summary_state:
+
+      candidate_variants_assessed:
+        3
+
+      effect_rows_assessed:
+        18
+
+      directionally_usable_effect_rows:
+        16
+
+      directionally_unusable_effect_rows:
+        2
+
+      candidates_with_within_publication_heterogeneity:
+        2
+
+      candidates_with_cross_publication_heterogeneity:
+        1
+
+      independent_replications_verified:
+        0
+
+      independent_replication_claimed:
+        false
+
+
+# ============================================================================
+# Direct processed inputs
+# ============================================================================
+
+inputs:
+
+  m7_5b_candidate_resolution:
+    "data/processed/m7/full_summary_statistics_audit/candidate_full_sumstats_resolution.parquet"
+
+  m7_5c_candidate_resolution:
+    "data/processed/m7/study_independence_harmonization/candidate_independence_harmonization_resolution.parquet"
+
+  m7_5c_publication_family_direction:
+    "data/processed/m7/study_independence_harmonization/publication_family_direction.parquet"
+
+
+# ============================================================================
+# Locked M6-M7 evidence state
+#
+# This section is declarative. It does not create new evidence.
+# Every field records conclusions already resolved upstream.
+# ============================================================================
+
+candidates:
+
+  # --------------------------------------------------------------------------
+  # rs10216902
+  # --------------------------------------------------------------------------
+
+  - rsid:
+      "rs10216902"
+
+    priority_rank:
+      1
+
+    priority_class:
+      "HIGH_PRIORITY"
+
+    trf_id:
+      "tRF-24-S3M8309N0Y"
+
+    disease_evidence:
+
+      m5_rank:
+        1
+
+      m5_class:
+        "REGIONAL_GENOME_WIDE"
+
+      recurrent_suggestive_support:
+        true
+
+      locus_level_disease_evidence:
+        true
+
+      exact_variant_full_sumstats_evidence:
+        true
+
+
+    regulatory_evidence:
+
+      retained_regulatory_feature:
+        true
+
+      regulatory_feature_id:
+        "INT98200"
+
+      regulatory_feature_type:
+        "INTRON_RETENTION"
+
+      regulatory_scope:
+        "CIS"
+
+      regulatory_feature_confirmed:
+        true
+
+      parent_gene_resolved:
+        false
+
+      parent_gene_status:
+        "REGULATORY_FEATURE_CONFIRMED_GENE_ANNOTATION_PENDING"
+
+      exact_event_reconstruction_reproducible:
+        false
+
+
+    trf_evidence:
+
+      identifier_resolved:
+        true
+
+      exact_sequence_resolved:
+        true
+
+      exact_sequence:
+        "GTAGTCGTGGCCGAGTGGTTAAGG"
+
+      sequence_length_nt:
+        24
+
+      parent_trna_resolved:
+        false
+
+      trf_class_resolved:
+        false
+
+      amino_acid_resolved:
+        false
+
+      anticodon_resolved:
+        false
+
+
+    external_molecular_evidence:
+
+      available:
+        true
+
+      dataset:
+        "GSE80400"
+
+      runs_assessed:
+        11
+
+      runs_sequence_positive:
+        11
+
+      total_sequence_positive_reads:
+        951
+
+      five_prime_boundary_reads:
+        947
+
+      standalone_24nt_reads:
+        0
+
+      evidence_class:
+        "CANDIDATE_5PRIME_SEQUENCE_WITH_LONGER_FRAGMENT_CONTEXT"
+
+      direct_mature_24nt_trf_confirmed:
+        false
+
+
+    tcga_validation:
+
+      exact_sequence_ready:
+        true
+
+      aligned_mirna_bams_available:
+        551
+
+      tcga_cases_with_bam:
+        494
+
+      controlled_access_required:
+        true
+
+      controlled_access_authorized:
+        false
+
+      direct_tcga_trf_quantification_performed:
+        false
+
+      status:
+        "DIRECT_TCGA_TRF_QUANTIFICATION_DEFERRED_CONTROLLED_ACCESS"
+
+
+    external_clinical_validation:
+
+      performed:
+        false
+
+      justified:
+        false
+
+      status:
+        "EXTERNAL_MOLECULAR_VALIDATION_RETAINED_CLINICAL_ASSOCIATION_NOT_JUSTIFIED"
+
+
+    formal_colocalization:
+
+      justified:
+        false
+
+      performed:
+        false
+
+      status:
+        "FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION"
+
+
+    gene_assignment:
+
+      resolved:
+        false
+
+      nearest_gene_substitution_used:
+        false
+
+
+  # --------------------------------------------------------------------------
+  # rs2328376
+  # --------------------------------------------------------------------------
+
+  - rsid:
+      "rs2328376"
+
+    priority_rank:
+      2
+
+    priority_class:
+      "INTERMEDIATE_PRIORITY"
+
+    trf_id:
+      "tRF-17-WS72092"
+
+    disease_evidence:
+
+      m5_rank:
+        2
+
+      m5_class:
+        "RECURRENT_SUGGESTIVE"
+
+      recurrent_suggestive_support:
+        true
+
+      locus_level_disease_evidence:
+        true
+
+      exact_variant_full_sumstats_evidence:
+        true
+
+
+    regulatory_evidence:
+
+      retained_regulatory_feature:
+        false
+
+      regulatory_feature_id:
+        null
+
+      regulatory_feature_type:
+        null
+
+      regulatory_scope:
+        null
+
+      regulatory_feature_confirmed:
+        false
+
+      parent_gene_resolved:
+        false
+
+      parent_gene_status:
+        "NO_DEFENSIBLE_GENE_ASSIGNMENT"
+
+      exact_event_reconstruction_reproducible:
+        false
+
+
+    trf_evidence:
+
+      identifier_resolved:
+        true
+
+      exact_sequence_resolved:
+        false
+
+      exact_sequence:
+        null
+
+      sequence_length_nt:
+        null
+
+      parent_trna_resolved:
+        false
+
+      trf_class_resolved:
+        false
+
+      amino_acid_resolved:
+        false
+
+      anticodon_resolved:
+        false
+
+
+    external_molecular_evidence:
+
+      available:
+        false
+
+      dataset:
+        null
+
+      runs_assessed:
+        0
+
+      runs_sequence_positive:
+        0
+
+      total_sequence_positive_reads:
+        0
+
+      five_prime_boundary_reads:
+        0
+
+      standalone_24nt_reads:
+        0
+
+      evidence_class:
+        "EXTERNAL_TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+      direct_mature_24nt_trf_confirmed:
+        false
+
+
+    tcga_validation:
+
+      exact_sequence_ready:
+        false
+
+      aligned_mirna_bams_available:
+        551
+
+      tcga_cases_with_bam:
+        494
+
+      controlled_access_required:
+        false
+
+      controlled_access_authorized:
+        false
+
+      direct_tcga_trf_quantification_performed:
+        false
+
+      status:
+        "DIRECT_TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+
+    external_clinical_validation:
+
+      performed:
+        false
+
+      justified:
+        false
+
+      status:
+        "CLINICAL_ASSOCIATION_NOT_AVAILABLE_NO_VALID_TRF_ABUNDANCE"
+
+
+    formal_colocalization:
+
+      justified:
+        false
+
+      performed:
+        false
+
+      status:
+        "FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION"
+
+
+    gene_assignment:
+
+      resolved:
+        false
+
+      nearest_gene_substitution_used:
+        false
+
+
+  # --------------------------------------------------------------------------
+  # rs1288100
+  # --------------------------------------------------------------------------
+
+  - rsid:
+      "rs1288100"
+
+    priority_rank:
+      3
+
+    priority_class:
+      "LOWER_PRIORITY"
+
+    trf_id:
+      "tRF-30-7EMQ18Y3E7QN"
+
+    disease_evidence:
+
+      m5_rank:
+        3
+
+      m5_class:
+        "SINGLE_STUDY_SUGGESTIVE"
+
+      recurrent_suggestive_support:
+        false
+
+      locus_level_disease_evidence:
+        true
+
+      exact_variant_full_sumstats_evidence:
+        true
+
+
+    regulatory_evidence:
+
+      retained_regulatory_feature:
+        false
+
+      regulatory_feature_id:
+        null
+
+      regulatory_feature_type:
+        null
+
+      regulatory_scope:
+        null
+
+      regulatory_feature_confirmed:
+        false
+
+      parent_gene_resolved:
+        false
+
+      parent_gene_status:
+        "NO_DEFENSIBLE_GENE_ASSIGNMENT"
+
+      exact_event_reconstruction_reproducible:
+        false
+
+
+    trf_evidence:
+
+      identifier_resolved:
+        true
+
+      exact_sequence_resolved:
+        false
+
+      exact_sequence:
+        null
+
+      sequence_length_nt:
+        null
+
+      parent_trna_resolved:
+        false
+
+      trf_class_resolved:
+        false
+
+      amino_acid_resolved:
+        false
+
+      anticodon_resolved:
+        false
+
+
+    external_molecular_evidence:
+
+      available:
+        false
+
+      dataset:
+        null
+
+      runs_assessed:
+        0
+
+      runs_sequence_positive:
+        0
+
+      total_sequence_positive_reads:
+        0
+
+      five_prime_boundary_reads:
+        0
+
+      standalone_24nt_reads:
+        0
+
+      evidence_class:
+        "EXTERNAL_TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+      direct_mature_24nt_trf_confirmed:
+        false
+
+
+    tcga_validation:
+
+      exact_sequence_ready:
+        false
+
+      aligned_mirna_bams_available:
+        551
+
+      tcga_cases_with_bam:
+        494
+
+      controlled_access_required:
+        false
+
+      controlled_access_authorized:
+        false
+
+      direct_tcga_trf_quantification_performed:
+        false
+
+      status:
+        "DIRECT_TRF_QUANTIFICATION_BLOCKED_SEQUENCE_UNRESOLVED"
+
+
+    external_clinical_validation:
+
+      performed:
+        false
+
+      justified:
+        false
+
+      status:
+        "CLINICAL_ASSOCIATION_NOT_AVAILABLE_NO_VALID_TRF_ABUNDANCE"
+
+
+    formal_colocalization:
+
+      justified:
+        false
+
+      performed:
+        false
+
+      status:
+        "FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION"
+
+
+    gene_assignment:
+
+      resolved:
+        false
+
+      nearest_gene_substitution_used:
+        false
+
+
+# ============================================================================
+# Evidence-domain vocabulary
+# ============================================================================
+
+evidence_domains:
+
+  disease_genetic:
+    "DISEASE_GENETIC_EVIDENCE"
+
+  regulatory:
+    "REGULATORY_FEATURE_EVIDENCE"
+
+  trf_identity:
+    "TRF_IDENTITY_EVIDENCE"
+
+  sequence:
+    "TRF_SEQUENCE_EVIDENCE"
+
+  external_molecular:
+    "EXTERNAL_MOLECULAR_EVIDENCE"
+
+  tcga_direct:
+    "TCGA_DIRECT_TRF_EVIDENCE"
+
+  clinical:
+    "CLINICAL_ASSOCIATION_EVIDENCE"
+
+  formal_coloc:
+    "FORMAL_COLOCALIZATION_EVIDENCE"
+
+  gene_assignment:
+    "GENE_ASSIGNMENT_EVIDENCE"
+
+
+# ============================================================================
+# Integrated evidence classification
+# ============================================================================
+
+classification:
+
+  no_additive_score:
+    true
+
+  preserve_m6_priority:
+    true
+
+  evidence_domain_count_is_descriptive_only:
+    true
+
+  domain_count_determines_priority:
+    false
+
+  classes:
+
+    high_convergent:
+      "INTEGRATED_MULTI_DOMAIN_CONVERGENT_EVIDENCE_WITHOUT_CAUSAL_RESOLUTION"
+
+    genetic_supported_mechanistic_unresolved:
+      "GENETIC_EVIDENCE_SUPPORTED_REGULATORY_AND_MOLECULAR_LINKS_UNRESOLVED"
+
+    genetic_context_mechanistic_unresolved:
+      "GENETIC_ASSOCIATION_CONTEXT_RETAINED_MECHANISTIC_LINK_UNRESOLVED"
+
+    insufficient:
+      "INTEGRATED_EVIDENCE_INSUFFICIENT_FOR_MECHANISTIC_RESOLUTION"
+
+
+# ============================================================================
+# Interpretation templates
+# ============================================================================
+
+interpretation:
+
+  rs10216902:
+    "Highest-priority candidate with convergent disease, regulatory-feature, tRF identity, external sequence-level molecular, and exact-variant GWAS evidence. However, the parent gene remains unresolved, standalone mature 24-nt tRF confirmation is absent, TCGA direct tRF quantification was not performed because controlled access was unavailable, effect direction is heterogeneous across publication families, formal colocalization was not justified, sample independence remains unresolved, and no causal inference is supported."
+
+  rs2328376:
+    "Intermediate-priority candidate with recurrent suggestive disease evidence and exact-variant representation across multiple GWAS analyses. The tRF identifier is resolved, but its exact sequence, regulatory feature, gene assignment, and external molecular validation remain unresolved. Directional heterogeneity occurs within at least one publication family, independent replication is not established, and no formal colocalization or causal inference is supported."
+
+  rs1288100:
+    "Lower-priority candidate retained by suggestive disease evidence and exact-variant representation in public prostate cancer GWAS summary statistics. Its exact tRF sequence, regulatory feature, gene assignment, and external molecular validation remain unresolved. Directional heterogeneity occurs within at least one publication family, independent replication is not established, and mechanistic or causal interpretation is not supported."
+
+
+# ============================================================================
+# Limitation vocabulary
+# ============================================================================
+
+limitations:
+
+  sequence_unresolved:
+    "TRF_SEQUENCE_UNRESOLVED"
+
+  regulatory_feature_unresolved:
+    "REGULATORY_FEATURE_UNRESOLVED"
+
+  gene_annotation_unresolved:
+    "GENE_ANNOTATION_UNRESOLVED"
+
+  tcga_controlled_access:
+    "TCGA_DIRECT_TRF_QUANTIFICATION_DEFERRED_CONTROLLED_ACCESS"
+
+  mature_fragment_not_confirmed:
+    "STANDALONE_MATURE_TRF_NOT_DIRECTLY_CONFIRMED"
+
+  external_molecular_unavailable:
+    "EXTERNAL_MOLECULAR_VALIDATION_UNAVAILABLE"
+
+  clinical_association_not_justified:
+    "CLINICAL_ASSOCIATION_NOT_JUSTIFIED"
+
+  formal_coloc_unavailable:
+    "FORMAL_COLOCALIZATION_NOT_JUSTIFIED_DATA_LIMITATION"
+
+  directional_heterogeneity:
+    "GWAS_EFFECT_DIRECTION_HETEROGENEITY"
+
+  independence_unresolved:
+    "GWAS_SAMPLE_INDEPENDENCE_UNRESOLVED"
+
+  causal_unresolved:
+    "CAUSAL_RELATIONSHIP_NOT_ESTABLISHED"
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  arbitrary_additive_score_used:
+    false
+
+  candidate_priority_recalculated:
+    false
+
+  candidate_excluded_due_to_missing_validation:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  posterior_colocalization_probability_reported:
+    false
+
+  fine_mapping_performed:
+    false
+
+  nearest_gene_imputation_performed:
+    false
+
+  gene_assignment_inferred:
+    false
+
+  candidate_trf_sequence_inferred:
+    false
+
+  processed_mirna_used_as_trf_substitute:
+    false
+
+  tcga_direct_trf_quantification_performed:
+    false
+
+  external_clinical_association_performed:
+    false
+
+  independent_replication_claimed:
+    false
+
+  independent_replications_verified:
+    0
+
+  meta_analysis_performed:
+    false
+
+  pooled_gwas_effect_estimated:
+    false
+
+  effect_direction_concordance_claimed:
+    false
+
+  causal_inference_performed:
+    false
+
+  mechanistic_causality_claimed:
+    false
+
+
+# ============================================================================
+# Validation
+# ============================================================================
+
+validation:
+
+  expected_candidate_count:
+    3
+
+  expected_rsids:
+
+    - "rs10216902"
+    - "rs2328376"
+    - "rs1288100"
+
+  expected_priority_order:
+
+    - "rs10216902"
+    - "rs2328376"
+    - "rs1288100"
+
+  require_zero_causal_candidates:
+    true
+
+  require_zero_formal_coloc_candidates:
+    true
+
+  require_zero_independent_replications:
+    true
+
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+outputs:
+
+  processed_directory:
+    "data/processed/m7/integrated_evidence_resolution"
+
+  candidate_evidence_matrix_filename:
+    "candidate_integrated_evidence_matrix.parquet"
+
+  evidence_domain_matrix_filename:
+    "candidate_evidence_domain_matrix.parquet"
+
+  candidate_limitation_matrix_filename:
+    "candidate_limitation_matrix.parquet"
+
+  candidate_resolution_filename:
+    "candidate_integrated_resolution.parquet"
+
+  summary_filename:
+    "integrated_evidence_resolution_summary.parquet"
+
+  qc_relative_path:
+    "data/processed/m7/qc/m7_6_integrated_evidence_resolution.json"
+
+
+overall_status:
+  "INTEGRATED_EVIDENCE_RESOLUTION_COMPLETE_WITHOUT_CAUSAL_RESOLUTION"
+
+
+next_stage:
+  "MANUSCRIPT_INTEGRATED_RESULTS_SYNTHESIS"

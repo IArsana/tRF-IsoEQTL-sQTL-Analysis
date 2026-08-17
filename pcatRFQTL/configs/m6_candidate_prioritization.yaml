@@ -1,0 +1,239 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_candidate_prioritization.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.1
+
+stage: final_candidate_prioritization
+
+
+# ============================================================================
+# Candidate universe
+#
+# These are the three PRAD tRF-QTL candidates carried forward from M3-M5.
+# No new candidate is introduced at M6.1.
+# ============================================================================
+
+candidate_leads:
+
+  rs10216902:
+
+    trfqtl_candidate:
+      retained: true
+
+    disease_evidence:
+      class: REGIONAL_GENOME_WIDE
+      architecture: REGIONAL_SIGNAL_WITHOUT_DIRECT_LEAD_ASSOCIATION
+
+      regional_genome_wide: true
+      recurrent_suggestive: true
+      single_study_suggestive: false
+
+      direct_lead_disease_association:
+        suggestive: false
+
+    regulatory_evidence:
+      moradi_locus_evidence: true
+      moradi_direct_or_proxy_bridge: true
+
+      regulatory_feature_ids:
+        - INT98200
+
+    ld_evidence:
+      candidate_reference_ld_available: true
+      disease_to_regulatory_proxy_ld_bridge: false
+
+    coloc_evidence:
+      formal_coloc_ready: false
+      final_status: FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION
+
+
+  rs2328376:
+
+    trfqtl_candidate:
+      retained: true
+
+    disease_evidence:
+      class: MULTI_STUDY_SUGGESTIVE
+      architecture: RECURRENT_SUGGESTIVE
+
+      regional_genome_wide: false
+      recurrent_suggestive: true
+      single_study_suggestive: false
+
+      direct_lead_disease_association:
+        suggestive: false
+
+    regulatory_evidence:
+      moradi_locus_evidence: false
+      moradi_direct_or_proxy_bridge: false
+
+      regulatory_feature_ids: []
+
+    ld_evidence:
+      candidate_reference_ld_available: true
+      disease_to_regulatory_proxy_ld_bridge: false
+
+    coloc_evidence:
+      formal_coloc_ready: false
+      final_status: FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION
+
+
+  rs1288100:
+
+    trfqtl_candidate:
+      retained: true
+
+    disease_evidence:
+      class: SINGLE_STUDY_SUGGESTIVE
+      architecture: SINGLE_STUDY_SUGGESTIVE
+
+      regional_genome_wide: false
+      recurrent_suggestive: false
+      single_study_suggestive: true
+
+      direct_lead_disease_association:
+        suggestive: false
+
+    regulatory_evidence:
+      moradi_locus_evidence: false
+      moradi_direct_or_proxy_bridge: false
+
+      regulatory_feature_ids: []
+
+    ld_evidence:
+      candidate_reference_ld_available: true
+      disease_to_regulatory_proxy_ld_bridge: false
+
+    coloc_evidence:
+      formal_coloc_ready: false
+      final_status: FORMAL_COLOC_NOT_JUSTIFIED_DATA_LIMITATION
+
+
+# ============================================================================
+# Locked upstream QC
+# ============================================================================
+
+upstream_qc:
+
+  final_coloc_resolution:
+    relative_path: "data/processed/m5/qc/m5_6d_final_coloc_resolution.json"
+    required: true
+
+
+# ============================================================================
+# Evidence hierarchy
+#
+# IMPORTANT:
+# This is a deterministic lexicographic hierarchy.
+#
+# It is NOT:
+#   GWAS = X points
+#   QTL  = Y points
+#   LD   = Z points
+#
+# Therefore no arbitrary additive biological score is produced.
+# ============================================================================
+
+priority_hierarchy:
+
+  disease_evidence_order:
+
+    REGIONAL_GENOME_WIDE: 1
+
+    MULTI_STUDY_SUGGESTIVE: 2
+
+    SINGLE_STUDY_SUGGESTIVE: 3
+
+    NO_REGIONAL_DISEASE_SIGNAL: 4
+
+
+  regulatory_evidence_tiebreak:
+
+    moradi_direct_or_proxy_bridge:
+      preferred: true
+
+    moradi_locus_evidence:
+      preferred: true
+
+
+  trfqtl_requirement:
+
+    retained_candidate_required: true
+
+
+# ============================================================================
+# Priority classes
+# ============================================================================
+
+priority_classes:
+
+  rank_1:
+    label: HIGH_PRIORITY
+
+  rank_2:
+    label: INTERMEDIATE_PRIORITY
+
+  rank_3:
+    label: LOWER_PRIORITY
+
+
+# ============================================================================
+# Interpretation rules
+# ============================================================================
+
+interpretation_policy:
+
+  ranking_represents:
+    - relative_strength_of_current_integrated_evidence
+    - downstream_biological_interpretation_priority
+
+  ranking_does_not_represent:
+    - causal_probability
+    - posterior_probability
+    - fine_mapping_probability
+    - colocalization_probability
+    - clinical_effect_size
+
+  candidate_exclusion_allowed:
+    false
+
+  all_candidates_continue_to_m6:
+    true
+
+  highest_priority_candidate_receives_deepest_annotation:
+    true
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  additive_arbitrary_scoring_used: false
+
+  formal_colocalization_performed: false
+
+  fine_mapping_performed: false
+
+  causal_inference_performed: false
+
+  candidate_absence_interpreted_as_null: false
+
+  related_gwas_analyses_treated_as_independent_replication: false
+
+  regulatory_evidence_treated_as_causal: false

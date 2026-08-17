@@ -1,0 +1,266 @@
+# ============================================================================
+# PCa-tRFQTL Research Pipeline
+#
+# File:
+#   configs/m6_candidate_gene_integration.yaml
+#
+# Author:
+#   I Putu Indra Arsana
+#
+# Project:
+#   Integrative Analysis of Prostate Cancer Risk Variants,
+#   tRNA-Derived Fragment QTLs, and Transcript Isoform Regulation
+#
+# License:
+#   MIT
+# ============================================================================
+
+milestone: M6.3
+
+stage: candidate_to_gene_integration
+
+
+# ============================================================================
+# Upstream QC
+# ============================================================================
+
+upstream_qc:
+
+  candidate_prioritization:
+
+    relative_path:
+      "data/processed/m6/qc/m6_1_candidate_prioritization.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.1"
+
+    expected_stage:
+      "final_candidate_prioritization"
+
+
+  regulatory_feature_mapping:
+
+    relative_path:
+      "data/processed/m6/qc/m6_2a_regulatory_feature_mapping.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.2A"
+
+    expected_stage:
+      "candidate_to_regulatory_feature_resolution"
+
+
+  regulatory_gene_annotation:
+
+    relative_path:
+      "data/processed/m6/qc/m6_2b_regulatory_gene_annotation.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.2B"
+
+    expected_stage:
+      "regulatory_feature_to_source_gene_annotation"
+
+
+  event_reconstruction:
+
+    relative_path:
+      "data/processed/m6/qc/m6_2c_1_event_reconstruction.json"
+
+    required: true
+
+    expected_milestone:
+      "M6.2C.1"
+
+    expected_stage:
+      "fase_event_reconstruction_feasibility_audit"
+
+
+# ============================================================================
+# Integration routes
+# ============================================================================
+
+gene_routes:
+
+  regulatory_feature_parent_gene:
+
+    enabled:
+      true
+
+    route_label:
+      "REGULATORY_FEATURE_PARENT_GENE"
+
+    minimum_assignment_requirement:
+      "SOURCE_OR_REPRODUCIBLE_GENE_ASSIGNMENT"
+
+    allow_unresolved_feature:
+      true
+
+
+  source_reported_gene:
+
+    enabled:
+      true
+
+    route_label:
+      "SOURCE_REPORTED_GENE"
+
+    minimum_assignment_requirement:
+      "EXPLICIT_SOURCE_GENE_IDENTIFIER"
+
+
+  trf_parent_gene:
+
+    enabled:
+      false
+
+    route_label:
+      "TRF_PARENT_GENE"
+
+    reason_disabled:
+      "TRF_TO_GENE_ANNOTATION_NOT_YET_ESTABLISHED"
+
+
+  disease_locus_gene:
+
+    enabled:
+      false
+
+    route_label:
+      "DISEASE_LOCUS_GENE"
+
+    reason_disabled:
+      "NO_SOURCE_SUPPORTED_DISEASE_LOCUS_GENE_ASSIGNMENT"
+
+
+# ============================================================================
+# Gene assignment hierarchy
+#
+# These classes describe provenance, not biological importance.
+# ============================================================================
+
+assignment_hierarchy:
+
+  SOURCE_REPORTED_GENE:
+    rank: 1
+
+  SOURCE_REPRODUCIBLE_EVENT_GENE:
+    rank: 2
+
+  SOURCE_COMPATIBLE_GENE:
+    rank: 3
+
+  EXTERNAL_CURATED_GENE:
+    rank: 4
+
+  NEAREST_GENE:
+    rank: 99
+
+
+# ============================================================================
+# Resolution statuses
+# ============================================================================
+
+resolution_status:
+
+  resolved_single_gene:
+    "GENE_ASSIGNMENT_RESOLVED"
+
+  resolved_multiple_genes:
+    "MULTIPLE_SOURCE_SUPPORTED_GENES"
+
+  regulatory_feature_gene_unresolved:
+    "REGULATORY_FEATURE_SUPPORTED_PARENT_GENE_UNRESOLVED"
+
+  no_gene_assignment:
+    "NO_DEFENSIBLE_GENE_ASSIGNMENT"
+
+  candidate_retained_without_gene:
+    "CANDIDATE_RETAINED_WITHOUT_DEFENSIBLE_GENE_ASSIGNMENT"
+
+
+# ============================================================================
+# Regulatory-feature unresolved policy
+# ============================================================================
+
+unresolved_regulatory_feature_policy:
+
+  preserve_feature_identity:
+    true
+
+  preserve_feature_support:
+    true
+
+  interpret_as_no_gene:
+    false
+
+  drop_candidate:
+    false
+
+  nearest_gene_fallback:
+    false
+
+  positional_gene_fallback:
+    false
+
+
+# ============================================================================
+# Scientific safeguards
+# ============================================================================
+
+scientific_policy:
+
+  candidate_removed_if_gene_unresolved:
+    false
+
+  nearest_gene_assignment_performed:
+    false
+
+  snp_proximity_gene_assignment_performed:
+    false
+
+  cis_proximity_gene_assignment_performed:
+    false
+
+  feature_numeric_id_decoded:
+    false
+
+  unresolved_feature_interpreted_as_no_biology:
+    false
+
+  unresolved_gene_interpreted_as_no_gene:
+    false
+
+  gene_assignment_interpreted_as_causal:
+    false
+
+  regulatory_feature_interpreted_as_causal:
+    false
+
+  formal_colocalization_performed:
+    false
+
+  fine_mapping_performed:
+    false
+
+  causal_inference_performed:
+    false
+
+
+# ============================================================================
+# Next stage
+# ============================================================================
+
+next_stage:
+
+  id:
+    "M6.4"
+
+  label:
+    "BIOLOGICAL_GENE_AND_PATHWAY_ANNOTATION"
